@@ -2,15 +2,12 @@
 
 Multiplayer Battleship over TCP.
 
-## Setup
-```
-cd src/
-make build
-```
-
 ## Compiling and Running
+
+These commands will produce 2 executables inside the `src/bin/` directory: `server` and `client`.
 ```
 cd src/
 make
-./main.out
 ```
+
+Run the server and the client in separate terminal windows. The server will wait for a client to connect.
