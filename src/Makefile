@@ -1,28 +1,65 @@
-.DEFAULT_GOAL := main.out
-.PHONY: main.out
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -std=c++11 -g
+LDFLAGS = 
 
-BUILD_FOLDER := build
+# Directories
+SRC_DIR = .
+OBJ_DIR = build
+BIN_DIR = bin
+DEP_DIR = $(OBJ_DIR)
 
-SOURCES := $(wildcard *.cpp)
-# For each name in SOURCES (notdir removes the folder name, basename removes the file extension), append .o
-OBJECTS := $(foreach x, $(basename $(notdir $(SOURCES))), $(BUILD_FOLDER)/$(x).o)
+# Source files
+CLIENT_SOURCES = client.cpp
+SERVER_SOURCES = server.cpp
+SHARED_SOURCES = 
 
-LIBS :=
+# Object files
+CLIENT_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES))
+SERVER_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SERVER_SOURCES))
+SHARED_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SHARED_SOURCES))
 
-FLAGS := -std=c++11 -g
+# Dependency files
+CLIENT_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(CLIENT_SOURCES))
+SERVER_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(SERVER_SOURCES))
+SHARED_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(SHARED_SOURCES))
 
+# Targets
+CLIENT_TARGET = $(BIN_DIR)/client
+SERVER_TARGET = $(BIN_DIR)/server
 
-$(BUILD_FOLDER)/%.o: %.cpp
-	g++ $(FLAGS) $< -c -o $@
+# Default target
+all: $(CLIENT_TARGET) $(SERVER_TARGET)
 
-main.out: $(OBJECTS)
-	g++ $(FLAGS) $(foreach x, $(LIBS), -I $x) $(OBJECTS) -o main.out
+# Create directories
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-# @ before a command to not print the command itself
-debug:
-	@echo $(LIBS)
-	@echo $(SOURCES)
-	@echo $(OBJECTS)
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
-$(BUILD_FOLDER):
-	mkdir $(BUILD_FOLDER)
+# Build client
+$(CLIENT_TARGET): $(CLIENT_OBJS) $(SHARED_OBJS) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Build server
+$(SERVER_TARGET): $(SERVER_OBJS) $(SHARED_OBJS) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Compile source files and generate dependencies
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $^
+
+# Individual targets
+client: $(CLIENT_TARGET)
+server: $(SERVER_TARGET)
+
+# Clean
+clean:
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+# Include dependency files
+-include $(CLIENT_DEPS) $(SERVER_DEPS) $(SHARED_DEPS)
+
+# Phony targets
+.PHONY: all client server clean
