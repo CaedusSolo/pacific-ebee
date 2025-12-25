@@ -15,7 +15,7 @@ public:
     ClientConnection(int portNum, string addr) : serverAddress(addr), port(portNum) {}
 
     Connection* startConnection() {
-        cout << "Connecting to ->" << serverAddress << ":" << port << endl;
+        cout << "Connecting to -> " << serverAddress << ":" << port << endl;
         return new Connection(clientFD);
     }
 
