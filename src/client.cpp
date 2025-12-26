@@ -1,11 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "connection.h"
+#include "Connection.h"
 
 using namespace std; 
 
-class ClientConnection() {
+class ClientConnection {
 private:
     int clientFD; //stub value here?
     int port;
