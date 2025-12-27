@@ -2,8 +2,9 @@
 #include "messages.h"
 
 
-GameClientManager::GameClientManager(Connection& serverConn) {
-    // Constructor implementation
+GameClientManager::GameClientManager(Connection& serverConn, Renderer& renderer) {
+    this->serverConn = serverConn;
+    this->renderer = renderer;
 }
 
 GameClientManager::~GameClientManager() {

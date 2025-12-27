@@ -4,13 +4,14 @@
 #include "constants.h"
 #include "messages.h"
 #include "vector2d.h"
-#include "connection.h"
+#include "Connection.h"
+#include "renderer.h"
 #include "game_states.h"
 
 
 class GameClientManager {
 public:
-    GameClientManager(Connection& serverConn);
+    GameClientManager(Connection& serverConn, Renderer& renderer);
     ~GameClientManager();
 
     void gameLoop();
