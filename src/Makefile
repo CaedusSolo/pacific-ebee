@@ -10,9 +10,9 @@ BIN_DIR = bin
 DEP_DIR = $(OBJ_DIR)
 
 # Source files
-CLIENT_SOURCES = client.cpp renderer.cpp
+CLIENT_SOURCES = client.cpp renderer.cpp game_client_manager.cpp
 SERVER_SOURCES = server.cpp
-SHARED_SOURCES = Connection.cpp
+SHARED_SOURCES = Connection.cpp vector2d.cpp
 
 # Object files
 CLIENT_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES))
