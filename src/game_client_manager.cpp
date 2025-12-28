@@ -35,7 +35,7 @@ void GameClientManager::gameLoop() {
         }
         else {
             HitResult opponentShotResult = this->listenForOpponentShot();
-            this->processHitResult(opponentShotResult, false);
+            this->processHitResult(opponentShotResult, true);
 
             isOurTurn = true;
         }
