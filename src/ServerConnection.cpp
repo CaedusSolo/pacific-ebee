@@ -36,7 +36,7 @@ void ServerConnection::startConnection() {
     }
 
     // Start listening for incoming connections
-    if (listen(getFD(), 2) < 0) {
+    if (listen(getFD(), 5) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
     }
