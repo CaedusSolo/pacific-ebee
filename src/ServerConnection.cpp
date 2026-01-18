@@ -42,7 +42,7 @@ void ServerConnection::startConnection() {
         exit(EXIT_FAILURE);
     }
 
-    if (listen(serverFD, 10) < 0) {
+    if (listen(serverFD, 5) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
     }
