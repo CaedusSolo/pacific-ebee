@@ -26,7 +26,7 @@ class Renderer{
         void log(const string& message);
         void render(char* field);
 
-        void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE]);
+        void grid(int PLAYER_NUM, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE]);
 };
 
 
