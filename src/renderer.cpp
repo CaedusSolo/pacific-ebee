@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include <iomanip>
 
 void Renderer::log(const string& message){
     // prints normally if passed a normal message,
@@ -7,5 +8,28 @@ void Renderer::log(const string& message){
 };
 void Renderer::render(char* field){
     cout << field;
+}
+
+void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE]){
+    int size = 10 + (playerCount -2) * 5;  // each player increase, grid increases by 5
+    if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
+
+    cout << "   "; //column
+    for (int i = 0; i < size; i++) {
+        cout << " " << (char)('A' + i) << " ";
+    }
+    cout << endl;
+
+    for (int r = 0; r < size; r++) {
+        cout << setw(2) << (r + 1) << " ";
+
+        for (int c = 0; c < size; c++) {
+            char cell = battlefield[r][c];
+        }
+
+        if (cell == 'X') cout << ANSI::RED << " X " << ANSI::RESET;
+        else if 
+    }
+
 }
 
