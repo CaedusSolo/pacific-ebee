@@ -14,22 +14,30 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
     int size = 10 + (playerCount -2) * 5;  // each player increase, grid increases by 5
     if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
 
-    cout << "   "; //column
+    cout << "   "; 
+
+    //column
     for (int i = 0; i < size; i++) {
-        cout << " " << (char)('A' + i) << " ";
+        if (i < 26) { 
+            cout << " " << (char)('A' + i) << " ";
+        } else {
+            cout << " " << (char)('a' + (i - 26)) << " "; // if grid exceeds max UPPERCASE alphabets, continue with LOWERCASE 
+        }
+        
     }
     cout << endl;
 
+    //row
     for (int r = 0; r < size; r++) {
         cout << setw(2) << (r + 1) << " ";
 
         for (int c = 0; c < size; c++) {
             char cell = battlefield[r][c];
+            if (cell == 'X') cout << ANSI::RED << " X " << ANSI::RESET;
+            else if (cell == 'O') cout << ANSI::BLUE << " 0 " << ANSI::RESET;
+            else cout << " . ";
         }
-
-        if (cell == 'X') cout << ANSI::RED << " X " << ANSI::RESET;
-        else if 
+        cout << endl;
     }
-
 }
 
