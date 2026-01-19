@@ -24,7 +24,7 @@ void GameClientManager::gameLoop() {
 
     GameStatus gameStatus = GameStatus::ONGOING;
     while (gameStatus == GameStatus::ONGOING) {
-        this->renderer.render(battlefield);
+        this->renderer.grid(PLAYER_NUM, battlefield);
 
         if (isOurTurn) {
             Vector2D coords = this->askShotCoords();
