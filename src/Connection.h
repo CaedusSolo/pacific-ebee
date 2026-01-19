@@ -12,7 +12,7 @@ class Connection {
 
         ~Connection();
 
-        void sendMessage(string message);
+        void sendMessage(string outgoingMessage);
         string listenForMessage();
         int getFD();
 };
