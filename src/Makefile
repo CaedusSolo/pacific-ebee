@@ -11,7 +11,7 @@ DEP_DIR = $(OBJ_DIR)
 
 # Source files
 CLIENT_SOURCES = client.cpp renderer.cpp game_client_manager.cpp
-SERVER_SOURCES = server.cpp
+SERVER_SOURCES = server.cpp server_game_manager.cpp
 SHARED_SOURCES = Connection.cpp vector2d.cpp
 
 # Object files
