@@ -35,7 +35,7 @@ void ServerConnection::startConnection() {
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
+    address.sin_port = htons(portNumber);
 
     if (bind(serverFD, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
@@ -47,7 +47,7 @@ void ServerConnection::startConnection() {
         exit(EXIT_FAILURE);
     }
 
-    cout << "Server listening on port " << port << "..." << endl;
+    cout << "Server listening on port " << portNumber << "..." << endl;
 }
 
 Connection* ServerConnection::acceptPlayer() {
