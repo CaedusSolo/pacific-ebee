@@ -5,6 +5,7 @@
 #include <sys/socket.h> // For socket definitions
 #include <arpa/inet.h>  // For htonl, ntohl
 #include <string>
+#include <vector>
 
 using namespace std;
 
