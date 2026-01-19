@@ -23,6 +23,7 @@ public:
 // === Helpers for primitive types ===
 
 // uint32
+// Can also be used for enums (with static_cast)
 char* uint32ToBytes(uint32_t value);
 uint32_t bytesToUint32(const char* bytes);
 // string
