@@ -10,7 +10,7 @@ void Renderer::render(char* field){
     cout << field;
 }
 
-void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE]){
+void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE], bool isOurBoard){
     int size = 10 + (playerCount -2) * 5;  // each player increase, grid increases by 5
     if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
 
@@ -34,7 +34,7 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
         for (int c = 0; c < size; c++) {
             char cell = battlefield[r][c];
 
-            if (cell == 'X' || cell = 'O') {
+            if (| (cell == 'S' && isOurBoard)|cell == 'X' || cell = 'O') {
                 cout << ANSI::BG_GREY; // attacked area turns grey
             } else {
                 cout << ANSI::BG_BLUE; // colour the bg blue 
@@ -46,12 +46,15 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
             else if (cell == 'O') {
                 cout << ANSI::BLUE << " O ";
             } 
+            else if (cell == 'S' && isOurBoard) {
+                cout << " S "; // placement of the ships
+            }
             else {
                 cout << " . ";
             }
 
             cout << ANSI::RESET_ALL;
-            
+
         }
         cout << endl;
     }
