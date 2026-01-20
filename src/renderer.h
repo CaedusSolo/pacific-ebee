@@ -32,8 +32,9 @@ class Renderer{
         // ansi escape codes for colours, blinking and bold, as well as resetting shtuff
         void log(const string& message);
         void render(char* field);
-
-        void grid(int PLAYER_NUM, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE]);
+        
+        // player count, battlefield size, player (own) grid? 
+        void grid(int PLAYER_NUM, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE, bool isOurBoard]);
 };
 
 
