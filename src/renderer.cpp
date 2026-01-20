@@ -44,7 +44,7 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
                 cout << ANSI::RED << ANSI::BOLD << " X ";
             } 
             else if (cell == 'O') {
-                cout << ANSI::RED << " O ";
+                cout << " O ";
             } 
             else if (cell == 'S' && isOurBoard) {
                 cout << " S "; // placement of the ships
