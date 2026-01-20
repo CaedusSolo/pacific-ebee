@@ -4,10 +4,13 @@
 #include <cstdint>
 #include <string>
 
-// This pattern uses CRTP (Curiously Recurring Template Pattern)
-// to allow derived classes to implement their own serialization logic.
-// It calls the derived class's implementation of toBytesImpl and fromBytesImpl.
+// This pattern called CRTP (Curiously Recurring Template Pattern)
 // crazy stuff
+//
+// For all messages to be passed through TCP, must inherit from this class
+// Example in messages.h & messages.cpp
+//
+// This allow any class derived from Serializable to be converted to/from bytes
 template<typename Derived>
 class Serializable {
 public:
