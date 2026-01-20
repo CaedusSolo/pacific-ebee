@@ -33,8 +33,13 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
 
         for (int c = 0; c < size; c++) {
             char cell = battlefield[r][c];
-            if (cell == 'X') cout << ANSI::RED << " X " << ANSI::RESET;
-            else if (cell == 'O') cout << ANSI::BLUE << " 0 " << ANSI::RESET;
+
+            if (cell == 'X') {
+                cout << ANSI::RED << ANSI::BOLD << " X " << ANSI::RESET;
+            } 
+            else if (cell == 'O') {
+                cout << ANSI::BLUE << " O " << ANSI::RESET;
+            } 
             else cout << " . ";
         }
         cout << endl;
