@@ -13,6 +13,8 @@ namespace ANSI {
     static constexpr const char* RESET = "\033[0m";  
     static constexpr const char* ORANGE = "\033[33m";  
     static constexpr const char* RED = "\033[31m";  
+    static constexpr const char* GREEN = "\033[32m";
+    static constexpr const char* PINK = "\033[95m";
     static constexpr const char* SLOW_BLINK = "\033[5m";  
     static constexpr const char* RAPID_BLINK = "\033[6m";  
     static constexpr const char* STOP_BLINK = "\033[25m";  
