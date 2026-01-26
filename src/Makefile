@@ -1,7 +1,7 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -std=c++11 -g
-LDFLAGS = 
+LDFLAGS =
 
 # Directories
 SRC_DIR = .
@@ -12,7 +12,7 @@ DEP_DIR = $(OBJ_DIR)
 # Source files
 CLIENT_SOURCES = client.cpp renderer.cpp game_client_manager.cpp
 SERVER_SOURCES = ServerConnection.cpp server.cpp server_game_manager.cpp
-SHARED_SOURCES = Connection.cpp vector2d.cpp
+SHARED_SOURCES = Connection.cpp vector2d.cpp serializable.cpp messages.cpp
 
 # Object files
 CLIENT_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES))
