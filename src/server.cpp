@@ -1,23 +1,24 @@
-#include <iostream>
-#include <vector>
-#include <string>
+#include "ServerConnection.h"
+#include "server_game_manager.h"
+
 
 using namespace std;
 
-class ServerConnection {
-private:
-    int port = 8000;
-    int serverFD;
-
-public:
-    ServerConnection(int portNum) : port(portNum) {}
-
-    void startConnection() {
-        cout << "Server started on port " << port << endl;
-    }
-
-};
+// Flow:
+// Start server connection
+// Initialize game manager with the server connection
+// Accept player connections
+// Fork processes once all players are connected
+// Start game loop in each process
 
 int main (int argc, char *argv[]) {
+    // Default port
+    int port = 8999;
+    ServerConnection server(port);
+
+    int numPlayers = 3;
+    ServerGameManager gameManager(numPlayers, &server);
+    gameManager.startGame();
+
     return 0;
 }

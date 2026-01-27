@@ -2,8 +2,10 @@
 #define SERVER_GAME_MANAGER_H
 
 #include "vector2d.h"
-#include "renderer.h"
+#include "player.h"
+#include "ServerConnection.h"
 
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -19,11 +21,16 @@ private:
     vector<Player> players;
     int numPlayers;
     bool isGameOver;
-    Renderer renderer;
+
     int currentPlayerIndex;
+
+    ServerConnection *serverConnection;
+
 public:
-    ServerGameManager();
+    ServerGameManager(int numPlayers, ServerConnection *serverConn);
+    void startGame();
     void gameLoop();
+    void handlePlayer();
     Player* checkPlayerHit();
 };
 
