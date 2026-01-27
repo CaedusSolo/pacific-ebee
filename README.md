@@ -38,22 +38,22 @@ sequenceDiagram
 
     C1->>S: Send player's name
     C2->>S: Send player's name
-    
+
     S->>C1: Send battlefield
     S->>C2: Send battlefield
-    
+
     S->>S: Choose first player
     S->>C1: Your turn
     S->>C2: Opponent's turn
-    
+
     Note over S,C2: Game Loop
-    
+
     loop Each Turn
         C1->>S: Attack coordinates
         S->>S: Process attack, update state
         S->>C1: Attack result (hit/miss/sunk)
         S->>C2: Attack result (hit/miss/sunk)
-        
+
         alt Game Over
             S->>S: Calculate scores
             S->>C1: Game Over + win/loss + score
