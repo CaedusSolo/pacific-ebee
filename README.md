@@ -73,3 +73,20 @@ sequenceDiagram
         end
     end
 ```
+
+## Server system
+
+From the assignment:
+- Each player is handled by a child process created using fork().
+- Logging and turn-management is handled by separate threads within the parent process.
+
+Sharing resources with child processes is a massive pain in the ass, so we gonna limit that
+
+**Current algorithm for server**:
+- Get all client connections
+- Fork process for each client
+- For each child process:
+    - Talk with the client, and relay to main process
+- Main process get data from child process and handles the game logic
+- Main process give response to child process
+- Child process send response to client
