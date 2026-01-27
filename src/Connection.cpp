@@ -1,11 +1,11 @@
 #include "Connection.h"
-#include <iostream>
 #include <cstring>      // For memset
 #include <unistd.h>     // For read, write, close
 #include <sys/socket.h> // For socket definitions
 #include <arpa/inet.h>  // For htonl, ntohl
 #include <string>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ Connection::~Connection() {
 }
 
 void Connection::sendMessage(string outgoingMessage) {
-    
+
     // 4 bytes
     uint32_t messageLength = outgoingMessage.length();
 
@@ -31,7 +31,7 @@ void Connection::sendMessage(string outgoingMessage) {
 
     if (bytesWrittenHeader != sizeof(networkOrderLength)) {
         perror("Failed to send length of message");
-        return; 
+        return;
     }
 
     ssize_t totalBytesWritten = 0;
@@ -40,7 +40,7 @@ void Connection::sendMessage(string outgoingMessage) {
         size_t bytesRemaining = messageLength - totalBytesWritten;
 
         ssize_t bytesWrittenCurrentChunk = write(socketFD, remainingDataPointer, bytesRemaining);
-        
+
         if (bytesWrittenCurrentChunk < 0) {
             perror("Failed to send message body");
             return;
@@ -61,7 +61,7 @@ string Connection::listenForMessage() {
     // Loop until received exactly 4 bytes
     while (totalHeaderBytesRead < headerSize) {
         ssize_t bytesReadCurrentChunk = read(socketFD, headerBufferPointer + totalHeaderBytesRead, headerSize - totalHeaderBytesRead);
-        
+
         if (bytesReadCurrentChunk == 0) return ""; // client closed connection
         if (bytesReadCurrentChunk < 0) {
             perror("Read header failed. Aborting now.");
@@ -83,7 +83,7 @@ string Connection::listenForMessage() {
         size_t bytesToRead = messageLength - totalMessageBytesRead;
 
         ssize_t bytesReadCurrentChunk = read(socketFD, writeLocation, bytesToRead);
-        
+
         if (bytesReadCurrentChunk <= 0) {
             perror("Read body failed or connection closed mid-message");
             return "";
