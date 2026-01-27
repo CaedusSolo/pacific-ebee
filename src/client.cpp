@@ -13,8 +13,16 @@ Connection* connectToServer(string serverIP, int port);
 int main (int argc, char *argv[]) {
     // Get the actual first argument (IP address of server)
     // Note that the first argument (argv[0]) is the program name
-    const char* serverIP = argv[1];
-    const int port = argv[2] ? stoi(argv[2]) : 8080; // Default port 8080 if not provided
+    const char* serverIP = "127.0.0.1";
+    // Default port 8080 if not provided
+    const int port = argv[2] ? stoi(argv[2]) : 8999;
+
+    Connection* conn = connectToServer(serverIP, port);
+    if (conn == nullptr) {
+        return 1; // Connection failed
+    }
+    conn->sendMessage(argv[1]);
+    while (true) {};
 }
 
 Connection* connectToServer(string serverIP, int port) {
