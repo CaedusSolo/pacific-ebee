@@ -1,7 +1,7 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++11 -g
-LDFLAGS = 
+CXXFLAGS = -std=c++11 -g -lrt
+LDFLAGS =
 
 # Directories
 SRC_DIR = .
