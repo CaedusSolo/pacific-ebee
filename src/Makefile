@@ -58,8 +58,5 @@ server: $(SERVER_TARGET)
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-# Include dependency files
--include $(CLIENT_DEPS) $(SERVER_DEPS) $(SHARED_DEPS)
-
 # Phony targets
 .PHONY: all client server clean
