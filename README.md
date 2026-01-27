@@ -18,18 +18,18 @@ sequenceDiagram
     participant S as Server
     participant C1 as Client 1
     participant C2 as Client 2
-    
+
     Note over S: Server starts
     S->>S: socket(), bind(), listen()
-    
+
     C1->>S: connect()
     S->>S: accept()
     Note over C1,S: Connection established
-    
+
     C2->>S: connect()
     S->>S: accept()
     Note over C2,S: Connection established
-    
+
     C1->>S: Send Ready signal
     C2->>S: Send Ready signal
 
