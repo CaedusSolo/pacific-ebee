@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++11 -g
+CXXFLAGS = -std=c++11 -g -lrt
 LDFLAGS =
 
 # Directories
@@ -57,9 +57,6 @@ server: $(SERVER_TARGET)
 # Clean
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Include dependency files
--include $(CLIENT_DEPS) $(SERVER_DEPS) $(SHARED_DEPS)
 
 # Phony targets
 .PHONY: all client server clean

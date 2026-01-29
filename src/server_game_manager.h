@@ -1,14 +1,19 @@
 #ifndef SERVER_GAME_MANAGER_H
 #define SERVER_GAME_MANAGER_H
-#include "vector"
-#include "renderer.h"
+
+#include "vector2d.h"
+#include "player.h"
+#include "ServerConnection.h"
+
+#include <string>
+#include <vector>
 
 using namespace std;
 
 struct Shot{
     Vector2D coord;
     bool isHit;
-}
+};
 
 class ServerGameManager{
 private:
@@ -16,11 +21,16 @@ private:
     vector<Player> players;
     int numPlayers;
     bool isGameOver;
-    Renderer renderer;
+
     int currentPlayerIndex;
+
+    ServerConnection *serverConnection;
+
 public:
-    ServerGameManager();
+    ServerGameManager(int numPlayers, ServerConnection *serverConn);
+    void startGame();
     void gameLoop();
+    void handlePlayer();
     Player* checkPlayerHit();
 };
 
