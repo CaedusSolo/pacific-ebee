@@ -18,18 +18,18 @@ sequenceDiagram
     participant S as Server
     participant C1 as Client 1
     participant C2 as Client 2
-    
+
     Note over S: Server starts
     S->>S: socket(), bind(), listen()
-    
+
     C1->>S: connect()
     S->>S: accept()
     Note over C1,S: Connection established
-    
+
     C2->>S: connect()
     S->>S: accept()
     Note over C2,S: Connection established
-    
+
     C1->>S: Send Ready signal
     C2->>S: Send Ready signal
 
@@ -38,22 +38,22 @@ sequenceDiagram
 
     C1->>S: Send player's name
     C2->>S: Send player's name
-    
+
     S->>C1: Send battlefield
     S->>C2: Send battlefield
-    
+
     S->>S: Choose first player
     S->>C1: Your turn
     S->>C2: Opponent's turn
-    
+
     Note over S,C2: Game Loop
-    
+
     loop Each Turn
         C1->>S: Attack coordinates
         S->>S: Process attack, update state
         S->>C1: Attack result (hit/miss/sunk)
         S->>C2: Attack result (hit/miss/sunk)
-        
+
         alt Game Over
             S->>S: Calculate scores
             S->>C1: Game Over + win/loss + score
@@ -73,3 +73,20 @@ sequenceDiagram
         end
     end
 ```
+
+## Server system
+
+From the assignment:
+- Each player is handled by a child process created using fork().
+- Logging and turn-management is handled by separate threads within the parent process.
+
+Sharing resources with child processes is a massive pain in the ass, so we gonna limit that
+
+**Current algorithm for server**:
+- Get all client connections
+- Fork process for each client
+- For each child process:
+    - Talk with the client, and relay to main process
+- Main process get data from child process and handles the game logic
+- Main process give response to child process
+- Child process send response to client

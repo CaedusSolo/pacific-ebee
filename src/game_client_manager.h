@@ -29,17 +29,17 @@ private:
 
     string askPlayerName();
     void sendPlayerName(const string& name);
-
-    void listenForNewBattlefield();
-    bool listenForFirstTurnDecision();
-
-    Vector2D askShotCoords();
-    HitResult sendShot(Vector2D coords);
-    HitResult listenForOpponentShot();
+    //
+    // void listenForNewBattlefield();
+    // bool listenForFirstTurnDecision();
+    //
+    // Vector2D askShotCoords();
+    // HitResult sendShot(Vector2D coords);
+    // HitResult listenForOpponentShot();
     void processHitResult(const HitResult& result, bool isOpponent);
-
-    GameStatus listenForGameStatus();
-
+    //
+    // GameStatus listenForGameStatus();
+    //
     void endGame(bool isWinner);
     int listenForFinalScore();
 };
