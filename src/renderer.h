@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 
+#include "constants.h"
+
 using namespace std;
 
 namespace ANSI {  

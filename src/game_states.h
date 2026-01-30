@@ -1,6 +1,8 @@
 #ifndef GAME_STATES_H
 #define GAME_STATES_H
 
+class GameStates {};
+
 enum class Ship {
     CARRIER,
     BATTLESHIP,

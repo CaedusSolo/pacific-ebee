@@ -50,7 +50,7 @@ void ServerConnection::startConnection() {
     cout << "Server listening on port " << portNumber << "..." << endl;
 }
 
-Connection* ServerConnection::acceptPlayer() {
+int ServerConnection::acceptPlayer() {
     struct sockaddr_in clientAddr;
     int addrLen = sizeof(clientAddr);
 
@@ -60,8 +60,14 @@ Connection* ServerConnection::acceptPlayer() {
 
     if (newFD < 0) {
         perror("Accept failed. Aborting now.");
-        return nullptr;
+        return -1;
     }
 
-    return new Connection(newFD);
+    return newFD;
+}
+
+void ServerConnection::stopListening() {
+    close(serverFD);
+    cout << "Server listener (FD " << serverFD << ") closed." << endl;
+    serverFD = -1;
 }
