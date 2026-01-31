@@ -18,3 +18,7 @@ void Cell::addShip(Ship ship) {
 void Cell::removeShip(Ship ship) {
     ships.erase(std::remove(ships.begin(), ships.end(), ship), ships.end());
 }
+
+bool Cell::isEmpty() const {
+    return ships.empty();
+}
