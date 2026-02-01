@@ -1,23 +1,20 @@
-#ifdef  CELL_H
+#ifndef CELL_H
 #define CELL_H
 
 #include "vector2d.h"
-#include "vector"
 
-using namespace std;
+typedef struct {
+    Vector2D coordinates;
+    // Note: Ship vector/array would need to be defined
+    // For now, this is a simplified structure
+} Cell;
 
-class Cell{
-    private:
-        Vector2D coordinates;
-        vector<Ship> ships;    // ships in this cell
-    public:
-        Cell();
-        Cell(Vector2D coordinates);
-        bool isEmpty() const;
-        Vector2D getCoordinates() const;
-        vector<Ship> getShips() const;
-        void addShip(Ship ship);
-        void removeShip(Ship ship);
-};
+Cell* Cell_new();
+Cell* Cell_new_with_coordinates(Vector2D coordinates);
+void Cell_delete(Cell* self);
+bool Cell_isEmpty(const Cell* self);
+Vector2D Cell_getCoordinates(const Cell* self);
+void Cell_addShip(Cell* self, void* ship);
+void Cell_removeShip(Cell* self, void* ship);
 
 #endif
