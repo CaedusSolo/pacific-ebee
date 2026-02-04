@@ -2,7 +2,7 @@
 #define CONNECTION_H
 
 
-void sendMessage(const int fd, const char* outgoingMessage);
-char* listenForMessage(const int fd);
+void send_message(const int fd, const char* outgoingMessage);
+char* listen_for_message(const int fd);
 
 #endif
