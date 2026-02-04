@@ -1,53 +1,48 @@
 #ifndef VECTOR_2D_H
 #define VECTOR_2D_H
 
-#include <iostream>
-#include <ostream>
-#include <cstdint>
+#include <stdint.h>
+#include <stdbool.h>
 
-#include "serializable.h"
+typedef struct Vector2D {
+    int x;
+    int y;
+} Vector2D;
 
-using namespace std;
+// Constants
+extern const Vector2D ZERO;
 
-class Vector2D : public Serializable<Vector2D> {
-public:
-    uint32_t x;
-    uint32_t y;
+// Constructor-like function
+Vector2D vector2d_create(int x_val, int y_val);
 
-    static const Vector2D ZERO;
+// Arithmetic operations (replacing operator+, operator-)
+Vector2D vector2d_add(const Vector2D* a, const Vector2D* b);
+Vector2D vector2d_sub(const Vector2D* a, const Vector2D* b);
 
-    Vector2D(uint32_t x_val = 0, uint32_t y_val = 0);
+// In-place operations (replacing operator+=, operator-=)
+void vector2d_add_assign(Vector2D* self, const Vector2D* other);
+void vector2d_sub_assign(Vector2D* self, const Vector2D* other);
 
-    Vector2D operator+(const Vector2D& other) const;
-    Vector2D operator-(const Vector2D& other) const;
+// Scalar multiplication (replacing operator*)
+void vector2d_mul_assign(Vector2D* self, int scalar);
+Vector2D vector2d_mul(const Vector2D* vec, int scalar);
 
-    Vector2D& operator+=(const Vector2D& other);
-    Vector2D& operator-=(const Vector2D& other);
+// Magnitude of the vector
+int vector2d_magnitude(const Vector2D* self);
 
-    Vector2D& operator*=(const uint32_t& rhs);
-    friend Vector2D operator*(const Vector2D& lhs, const uint32_t& rhs);
-    friend Vector2D operator*(const uint32_t& lhs, const Vector2D& rhs);
+// Returns the unit vector version of a vector2d
+// Which is essentially the 'direction' part of a vector
+Vector2D vector2d_normalized(const Vector2D* self);
 
-    // Magnitude of the vector
-    uint32_t magnitude() const;
+// Comparison operations (replacing operator==, operator!=)
+bool vector2d_equals(const Vector2D* a, const Vector2D* b);
+bool vector2d_not_equals(const Vector2D* a, const Vector2D* b);
 
-    // Returns the unit vector version of a vector2d
-    // Which is essentially the 'direction' part of a vector
-    Vector2D normalized() const;
+// Distance calculation
+int vector2d_distance(const Vector2D* self, const Vector2D* other);
 
-    // This function doesn't accept 'self' parameter, so it must not be a member function
-    // Putting it as friend function isn't technically needed; operator== doesn't need private members anyway
-    // it's simply just to imply that it is related to this class
-    friend bool operator==(const Vector2D& a, const Vector2D& b);
-    friend bool operator!=(const Vector2D& a, const Vector2D& b);
-
-    friend ostream& operator<<(ostream& stream, const Vector2D& vec);
-
-    uint32_t distance(const Vector2D& other) const;
-
-    // Serialization implementation
-    char* toBytesImpl() const;
-    static Vector2D fromBytesImpl(const char* data);
-};
+// Serialization implementation
+char* vector2d_to_bytes(const Vector2D* self);
+Vector2D vector2d_from_bytes(const char* data);
 
 #endif // !VECTOR_2D_H
