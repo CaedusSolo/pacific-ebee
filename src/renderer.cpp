@@ -14,16 +14,16 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
     int size = 10 + (playerCount -2) * 5;  // each player increase, grid increases by 5
     if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
 
-    cout << "   "; 
+    cout << "   ";
 
     //column
     for (int i = 0; i < size; i++) {
-        if (i < 26) { 
+        if (i < 26) {
             cout << " " << (char)('A' + i) << " ";
         } else {
-            cout << " " << (char)('a' + (i - 26)) << " "; // if grid exceeds max UPPERCASE alphabets, continue with LOWERCASE 
+            cout << " " << (char)('a' + (i - 26)) << " "; // if grid exceeds max UPPERCASE alphabets, continue with LOWERCASE
         }
-        
+
     }
     cout << endl;
 
@@ -34,18 +34,18 @@ void Renderer::grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFI
         for (int c = 0; c < size; c++) {
             char cell = battlefield[r][c];
 
-            if (| (cell == 'S' && isOurBoard)|cell == 'X' || cell = 'O') {
+            if ((cell == 'S' && isOurBoard) ||cell == 'X' || cell == 'O') {
                 cout << ANSI::BG_GREY; // attacked area turns grey
             } else {
-                cout << ANSI::BG_BLUE; // colour the bg blue 
+                cout << ANSI::BG_BLUE; // colour the bg blue
             }
 
             if (cell == 'X') {
                 cout << ANSI::RED << ANSI::BOLD << " X ";
-            } 
+            }
             else if (cell == 'O') {
                 cout << " O ";
-            } 
+            }
             else if (cell == 'S' && isOurBoard) {
                 cout << " S "; // placement of the ships
             }
