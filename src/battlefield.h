@@ -1,7 +1,7 @@
 #ifndef BATTLEFIELD_H
 #define BATTLEFIELD_H
 
-#include "Cell.h"
+#include "cell.h"
 
 typedef struct {
     Cell** grid;  // 2D array of Cells
