@@ -1,16 +1,13 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "Connection.h"
-
-#include <string>
-
-using namespace std;
 
 struct Player {
-    string name;
+    // Make name maximum to 255 charaters + null termination
+    char name[256];
     int pid;
-    Connection* connection;
+    // Socket file descriptor
+    int fd;
 };
 
 #endif // !PLAYER_H
