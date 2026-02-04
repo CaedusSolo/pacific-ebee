@@ -4,44 +4,42 @@
 #include "constants.h"
 #include "messages.h"
 #include "vector2d.h"
-#include "Connection.h"
+#include "connection.h"
 #include "renderer.h"
 #include "game_states.h"
+#include "battlefield.h"
+#include "player.h"
 
 
-class GameClientManager {
-public:
-    GameClientManager(Connection& serverConn, Renderer& renderer);
-    ~GameClientManager();
 
-    void gameLoop();
+typedef struct GameClientManager {
+    Renderer* renderer;
 
-private:
-    Renderer& renderer;
+    Battlefield* battlefield;
+    int fd;
 
-    // Might have to abstract this into a Battlefield class later
-    char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE];
 
-    Connection& serverConn;
+} GameClientManager;
 
-    void waitForGameReady();
-    void sendReadySignal();
+GameClientManager game_client_manager_create(int fd, Renderer* renderer);
+void game_loop(GameClientManager* game_client_manager);
+static void waitForGameReady();
+static void sendReadySignal();
 
-    string askPlayerName();
-    void sendPlayerName(const string& name);
-    //
-    // void listenForNewBattlefield();
-    // bool listenForFirstTurnDecision();
-    //
-    // Vector2D askShotCoords();
-    // HitResult sendShot(Vector2D coords);
-    // HitResult listenForOpponentShot();
-    void processHitResult(const HitResult& result, bool isOpponent);
-    //
-    // GameStatus listenForGameStatus();
-    //
-    void endGame(bool isWinner);
-    int listenForFinalScore();
-};
+static char* askPlayerName();
+static void sendPlayerName(const PlayerName name);
+//
+// void listenForNewBattlefield();
+// bool listenForFirstTurnDecision();
+//
+// Vector2D askShotCoords();
+// HitResult sendShot(Vector2D coords);
+// HitResult listenForOpponentShot();
+static void processHitResult(const HitResult& result, bool isOpponent);
+//
+// GameStatus listenForGameStatus();
+//
+static void endGame(bool isWinner);
+static int listenForFinalScore(int fd);
 
 #endif // !GAME_MANAGER_H

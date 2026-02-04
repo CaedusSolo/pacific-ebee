@@ -1,10 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+// Make name maximum to 255 charaters + null termination
+typedef char PlayerName[256];
 
 struct Player {
-    // Make name maximum to 255 charaters + null termination
-    char name[256];
+    PlayerName name;
     int pid;
     // Socket file descriptor
     int fd;

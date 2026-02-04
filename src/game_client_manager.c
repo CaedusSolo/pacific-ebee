@@ -2,13 +2,13 @@
 #include "messages.h"
 
 
-GameClientManager::GameClientManager(Connection& serverConn, Renderer& renderer) : renderer(renderer), serverConn(serverConn) {}
+// GameClientManager::GameClientManager(Connection& serverConn, Renderer& renderer) : renderer(renderer), serverConn(serverConn) {}
 
-GameClientManager::~GameClientManager() {
-    // Destructor implementation
-}
+// GameClientManager::~GameClientManager() {
+//     // Destructor implementation
+// }
 
-void GameClientManager::gameLoop() {
+void gameLoop(GameClientManager* game_client_manager) {
     // this->sendReadySignal();
     // this->waitForGameReady();
     //
@@ -51,25 +51,25 @@ void GameClientManager::gameLoop() {
     // }
 }
 
-void GameClientManager::endGame(bool isWinner) {
-    // int score = this->listenForFinalScore();
-    // if (isWinner) {
-    //     this->renderer.showWin();
-    // } else {
-    //     this->renderer.showLose();
-    // }
-}
-
-void GameClientManager::processHitResult(const HitResult& result, bool isOpponent) {
-    // switch (result.type) {
-    //     case HitResult::Type::MISS:
-    //         this->renderer.showMiss(result.position, isOpponent);
-    //         break;
-    //     case HitResult::Type::HIT:
-    //         this->renderer.showHit(result.position, isOpponent);
-    //         break;
-    //     case HitResult::Type::SINK:
-    //         this->renderer.showSunk(result.position, isOpponent, result.shipSunk);
-    //         break;
-    // }
-}
+// void GameClientManager::endGame(bool isWinner) {
+//     // int score = this->listenForFinalScore();
+//     // if (isWinner) {
+//     //     this->renderer.showWin();
+//     // } else {
+//     //     this->renderer.showLose();
+//     // }
+// }
+//
+// void GameClientManager::processHitResult(const HitResult& result, bool isOpponent) {
+//     // switch (result.type) {
+//     //     case HitResult::Type::MISS:
+//     //         this->renderer.showMiss(result.position, isOpponent);
+//     //         break;
+//     //     case HitResult::Type::HIT:
+//     //         this->renderer.showHit(result.position, isOpponent);
+//     //         break;
+//     //     case HitResult::Type::SINK:
+//     //         this->renderer.showSunk(result.position, isOpponent, result.shipSunk);
+//     //         break;
+//     // }
+// }
