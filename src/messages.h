@@ -5,7 +5,7 @@
 #include "game_states.h"
 
 struct HitResult {
-    enum class Type {
+    enum Type {
         MISS,
         HIT,
         SINK
