@@ -1,13 +1,13 @@
-#include <string>
-#include "Connection.h"
+#include "connection.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <cstdio>
+#include <stdio.h>
+#include <stdbool.h>
+#include <inttypes.h>
 
-using namespace std;
 
-Connection* connectToServer(string serverIP, int port);
+int connectToServer(const char* serverIP, int port);
 
 
 int main (int argc, char *argv[]) {
@@ -15,38 +15,38 @@ int main (int argc, char *argv[]) {
     // Note that the first argument (argv[0]) is the program name
     const char* serverIP = "127.0.0.1";
     // Default port 8080 if not provided
-    const int port = argv[2] ? stoi(argv[2]) : 8999;
+    const int port = argv[2] ? strtoumax(argv[2], NULL, 10) : 8999;
 
-    Connection* conn = connectToServer(serverIP, port);
-    if (conn == nullptr) {
+    int fd = connectToServer(serverIP, port);
+    if (fd < 0) {
         return 1; // Connection failed
     }
-    conn->sendMessage(argv[1]);
+    send_message(fd, argv[1]);
     while (true) {};
 }
 
-Connection* connectToServer(string serverIP, int port) {
+int connectToServer(const char* serverIP, int port) {
     // Create socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Error creating socket");
-        return nullptr;
+        return NULL;
     }
 
-    sockaddr_in serverAddr;
+    struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
-    int status = inet_aton(serverIP.c_str(), &serverAddr.sin_addr);
+    int status = inet_aton(serverIP, &serverAddr.sin_addr);
     if (status == 0) {
         perror("Invalid IP address");
-        return nullptr;
+        return -1;
     }
 
     status = connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (status < 0) {
         perror("Error connecting to server");
-        return nullptr;
+        return -1;
     }
 
-    return new Connection(sockfd);
+    return sockfd;
 }
