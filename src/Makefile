@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++11 -g -lrt
+CXXFLAGS = -std=c99 -g -lrt
 LDFLAGS =
 
 # Directories
@@ -10,19 +10,19 @@ BIN_DIR = bin
 DEP_DIR = $(OBJ_DIR)
 
 # Source files
-CLIENT_SOURCES = client.cpp renderer.cpp game_client_manager.cpp
-SERVER_SOURCES = ServerConnection.cpp server.cpp server_game_manager.cpp
-SHARED_SOURCES = Connection.cpp vector2d.cpp serializable.cpp messages.cpp Cell.c Battlefield.c
+CLIENT_SOURCES = client.c renderer.c game_client_manager.c
+SERVER_SOURCES = ServerConnection.c server.c server_game_manager.c
+SHARED_SOURCES = Connection.c vector2d.c serializable.c messages.c Cell.c Battlefield.c
 
 # Object files
-CLIENT_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES)) $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
-SERVER_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SERVER_SOURCES)) $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
-SHARED_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(filter %.cpp,$(SHARED_SOURCES))) $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
+CLIENT_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
+SERVER_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
+SHARED_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
 
 # Dependency files
-CLIENT_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(CLIENT_SOURCES)) $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
-SERVER_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(SERVER_SOURCES)) $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
-SHARED_DEPS = $(patsubst %.cpp,$(DEP_DIR)/%.d,$(filter %.cpp,$(SHARED_SOURCES))) $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
+CLIENT_DEPS = $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
+SERVER_DEPS = $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
+SHARED_DEPS = $(patsubst %.c,$(DEP_DIR)/%.d,$(filter %.c,$(SHARED_SOURCES)))
 
 # Targets
 CLIENT_TARGET = $(BIN_DIR)/client
@@ -46,12 +46,8 @@ $(CLIENT_TARGET): $(CLIENT_OBJS) $(SHARED_OBJS) | $(BIN_DIR)
 $(SERVER_TARGET): $(SERVER_OBJS) $(SHARED_OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Compile source files and generate dependencies
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $^
-
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	gcc -std=c99 -g -MMD -MP -c -o $@ $^
+	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $^
 
 # Individual targets
 client: $(CLIENT_TARGET)
