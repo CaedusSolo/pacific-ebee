@@ -1,44 +1,29 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
 #include "constants.h"
+#include <stdbool.h>
 
-using namespace std;
 
-namespace ANSI {
+#define ANSI_BLUE "\033[34m"
+#define ANSI_ORANGE "\033[33m"
+#define ANSI_RED "\033[31m"
+#define ANSI_GREEN "\033[32m"
+#define ANSI_PINK "\033[95m"
 
-    static constexpr const char* BLUE = "\033[34m";
-    static constexpr const char* ORANGE = "\033[33m";
-    static constexpr const char* RED = "\033[31m";
-    static constexpr const char* GREEN = "\033[32m";
-    static constexpr const char* PINK = "\033[95m";
+#define ANSI_BG_BLUE "\033[44m"
+#define ANSI_BG_GREY "\033[100m"
 
-    static constexpr const char* BG_BLUE = "\033[44m";
-    static constexpr const char* BG_GREY = "\033[100m";
+#define ANSI_RESET "\033[0m"
+#define ANSI_SLOW_BLINK "\033[5m"
+#define ANSI_RAPID_BLINK "\033[6m"
+#define ANSI_STOP_BLINK "\033[25m"
+#define ANSI_BOLD "\033[1m"
+#define ANSI_NORMAL_WEIGHT "\033[22m"
+#define ANSI_RESET_ALL "\033[0m"
 
-    static constexpr const char* RESET = "\033[0m";
-    static constexpr const char* SLOW_BLINK = "\033[5m";
-    static constexpr const char* RAPID_BLINK = "\033[6m";
-    static constexpr const char* STOP_BLINK = "\033[25m";
-    static constexpr const char* BOLD = "\033[1m";
-    static constexpr const char* NORMAL_WEIGHT = "\033[22m";
-    static constexpr const char* RESET_ALL = "\033[0m";
-}
-class Renderer{
-    public:
-        // ansi escape codes for colours, blinking and bold, as well as resetting shtuff
-        void log(const string& message);
-        void render(char* field);
-
-        // player count, battlefield size, player (own) grid?
-        void grid(int PLAYER_NUM, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE], bool isOurBoard);
-};
-
+// player count, battlefield size, player (own) grid?
+void grid(int PLAYER_NUM, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE], bool isOurBoard);
 
 
 #endif
