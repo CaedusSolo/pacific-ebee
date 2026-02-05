@@ -1,5 +1,5 @@
-#include "Battlefield.h"
-#include "Cell.h"
+#include "battlefield.h"
+#include "cell.h"
 #include "vector2d.h"
 #include <stdlib.h>
 
@@ -7,7 +7,7 @@ Battlefield* Battlefield_new(int width, int height) {
     Battlefield* self = (Battlefield*)malloc(sizeof(Battlefield));
     self->width = width;
     self->height = height;
-    
+
     self->grid = (Cell**)malloc(height * sizeof(Cell*));
     for (int i = 0; i < height; ++i) {
         // iterate each row
@@ -15,7 +15,7 @@ Battlefield* Battlefield_new(int width, int height) {
         for (int j = 0; j < width; ++j) {
             // iterate each column
             // since j is each col, so its x, and i is each row so its y
-            self->grid[i][j] = *Cell_new_with_coordinates(Vector2D_new(j, i));
+            self->grid[i][j] = *Cell_new_with_coordinates(vector2d_create(j, i));
         }
     }
     return self;
