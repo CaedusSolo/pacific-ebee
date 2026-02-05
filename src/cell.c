@@ -1,9 +1,9 @@
-#include "Cell.h"
+#include "cell.h"
 #include <stdlib.h>
 
 Cell* Cell_new() {
     Cell* self = (Cell*)malloc(sizeof(Cell));
-    self->coordinates = Vector2D_new(0, 0);
+    self->coordinates = vector2d_create(0, 0);
     return self;
 }
 
