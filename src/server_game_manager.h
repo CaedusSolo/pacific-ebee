@@ -3,35 +3,27 @@
 
 #include "vector2d.h"
 #include "player.h"
-#include "ServerConnection.h"
+#include "constants.h"
 
-#include <string>
-#include <vector>
 
-using namespace std;
-
-struct Shot{
+typedef struct Shot{
+    bool is_hit;
     Vector2D coord;
-    bool isHit;
-};
+} Shot;
 
-class ServerGameManager{
-private:
-    vector<Shot> shotHistory;
-    vector<Player> players;
-    int numPlayers;
-    bool isGameOver;
+typedef struct ServerGameManager{
+    bool is_game_over;
+    int num_players;
+    int current_player_index;
+    int listening_fd;
+    Player players[PLAYER_NUM];
+} ServerGameManager;
 
-    int currentPlayerIndex;
-
-    ServerConnection *serverConnection;
-
-public:
-    ServerGameManager(int numPlayers, ServerConnection *serverConn);
-    void startGame();
-    void gameLoop();
-    void handlePlayer();
-    Player* checkPlayerHit();
-};
+ServerGameManager server_game_manager_create(int num_players, int listening_fd);
+void server_game_manager_destroy(ServerGameManager* self);
+void start_game(ServerGameManager* self);
+void gameLoop(ServerGameManager* self);
+void handle_player(Player player);
+void check_player_hit(ServerGameManager* self);
 
 #endif

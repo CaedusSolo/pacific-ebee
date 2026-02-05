@@ -4,6 +4,6 @@
 #include "connection.h"
 
 int server_connection_start(const int port_number);
-int acceptPlayer(const int fd);
+int server_connection_accept_player(const int fd);
 
 #endif
