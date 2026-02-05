@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 
 // Flow:
@@ -58,7 +59,7 @@ int main (int argc, char *argv[]) {
     }
 
     // Start game loop
-    gameLoop(&game_manager);
+    game_loop(&game_manager);
 
     return 0;
 }

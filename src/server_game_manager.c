@@ -16,11 +16,11 @@ ServerGameManager server_game_manager_create(int num_players, int listening_fd) 
     return game_manager;
 }
 
-void handlePlayer(Player player){
+void handle_player(Player player){
     printf("User (%s) connected\n", player.name);
 }
 
-void gameLoop(){
+void game_loop(ServerGameManager* self){
     // while(!isGameOver){
     //     // 1. Get current player
     //     Player& current = players[currentPlayerIndex];
