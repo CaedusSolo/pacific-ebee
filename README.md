@@ -8,6 +8,12 @@ These commands will produce 2 executables inside the `src/bin/` directory: `serv
 ```
 cd src/
 make
+
+# To run:
+bin/server
+
+# In separate terminal, replace [name] with the client's name
+bin/client [name]
 ```
 
 Run the server and the client in separate terminal windows. The server will wait for a client to connect.
