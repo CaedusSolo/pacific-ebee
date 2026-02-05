@@ -35,17 +35,17 @@ int server_connection_start(const int port_number) {
 }
 
 int server_connection_accept_player(const int fd) {
-    struct sockaddr_in clientAddr;
-    int addrLen = sizeof(clientAddr);
+    struct sockaddr_in client_addr;
+    socklen_t addr_len = sizeof(client_addr);
 
     printf("Waiting for connection...\n");
 
-    int newFD = accept(fd, (struct sockaddr*)&clientAddr, (socklen_t*)&addrLen);
+    int new_fd = accept(fd, (struct sockaddr*)&client_addr, &addr_len);
 
-    if (newFD < 0) {
+    if (new_fd < 0) {
         perror("Accept failed. Aborting now.");
         return -1;
     }
 
-    return newFD;
+    return new_fd;
 }
