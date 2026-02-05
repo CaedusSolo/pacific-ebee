@@ -1,5 +1,5 @@
 # Compiler and flags
-CXX = g++
+CXX = gcc
 CXXFLAGS = -std=c99 -g -lrt
 LDFLAGS =
 
@@ -12,7 +12,7 @@ DEP_DIR = $(OBJ_DIR)
 # Source files
 CLIENT_SOURCES = client.c renderer.c game_client_manager.c
 SERVER_SOURCES = ServerConnection.c server.c server_game_manager.c
-SHARED_SOURCES = Connection.c vector2d.c Cell.c Battlefield.c
+SHARED_SOURCES = Connection.c vector2d.c cell.c battlefield.c
 
 # Object files
 CLIENT_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter %.c,$(SHARED_SOURCES)))
