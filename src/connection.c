@@ -69,7 +69,7 @@ char* listen_for_message(const int fd, size_t* output_len) {
 
     // convert to big endian
     uint32_t message_length = ntohl(network_order_length);
-
+    *output_len = message_length;
 
     // read message body
     char* message_buffer = (char*)malloc(message_length);

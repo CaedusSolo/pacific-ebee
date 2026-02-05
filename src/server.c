@@ -37,6 +37,7 @@ int main (int argc, char *argv[]) {
         new_player.name[player_name_length] = '\0';
 
         game_manager.players[i] = new_player;
+        free(player_name_heap_ptr);
     }
 
     close(listening_fd);
