@@ -34,7 +34,7 @@ int server_connection_start(const int port_number) {
     return server_fd;
 }
 
-int acceptPlayer(const int fd) {
+int server_connection_accept_player(const int fd) {
     struct sockaddr_in clientAddr;
     int addrLen = sizeof(clientAddr);
 
