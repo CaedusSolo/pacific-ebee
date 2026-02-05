@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 
-int connectToServer(const char* serverIP, int port);
+int connect_to_server(const char* server_ip, int port);
 
 
 int main (int argc, char *argv[]) {
@@ -17,7 +17,7 @@ int main (int argc, char *argv[]) {
     // Default port 8080 if not provided
     const int port = argv[2] ? strtoumax(argv[2], NULL, 10) : 8999;
 
-    int fd = connectToServer(serverIP, port);
+    int fd = connect_to_server(serverIP, port);
     if (fd < 0) {
         return 1; // Connection failed
     }
@@ -25,24 +25,24 @@ int main (int argc, char *argv[]) {
     while (true) {};
 }
 
-int connectToServer(const char* serverIP, int port) {
+int connect_to_server(const char* server_ip, int port) {
     // Create socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Error creating socket");
-        return NULL;
+        return -1;
     }
 
-    struct sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    int status = inet_aton(serverIP, &serverAddr.sin_addr);
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    int status = inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
     if (status == 0) {
         perror("Invalid IP address");
         return -1;
     }
 
-    status = connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    status = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if (status < 0) {
         perror("Error connecting to server");
         return -1;

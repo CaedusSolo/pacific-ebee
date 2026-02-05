@@ -1,8 +1,6 @@
 #include "vector2d.h"
 
 #include <math.h>
-#include <string.h>
-#include <stdlib.h>
 
 
 const Vector2D ZERO = {0, 0};
@@ -56,14 +54,14 @@ int vector2d_distance(const Vector2D* self, const Vector2D* other) {
     // But the initial GenericRobot kinda not follow that ????
     // Imma use normal Pythagorean distance for now
 
-    int diff_squared_x = pow(self->x - other->x, 2);
-    int diff_squared_y = pow(self->y - other->y, 2);
+    double diff_squared_x = pow((double)self->x - (double)other->x, 2.0);
+    double diff_squared_y = pow((double)self->y - (double)other->y, 2.0);
 
     return (int)sqrt(diff_squared_x + diff_squared_y);
 }
 
 int vector2d_magnitude(const Vector2D* self) {
-    return (int)sqrt(pow(self->x, 2) + pow(self->y, 2));
+    return (int)sqrt(pow((double)self->x, 2.0) + pow((double)self->y, 2.0));
 }
 
 Vector2D vector2d_normalized(const Vector2D* self) {

@@ -13,15 +13,13 @@
 
 
 typedef struct GameClientManager {
-    Renderer* renderer;
-
     Battlefield* battlefield;
     int fd;
 
 
 } GameClientManager;
 
-GameClientManager game_client_manager_create(int fd, Renderer* renderer);
+GameClientManager game_client_manager_create(int fd);
 void game_loop(GameClientManager* game_client_manager);
 static void waitForGameReady();
 static void sendReadySignal();
@@ -35,7 +33,7 @@ static void sendPlayerName(const PlayerName name);
 // Vector2D askShotCoords();
 // HitResult sendShot(Vector2D coords);
 // HitResult listenForOpponentShot();
-static void processHitResult(const HitResult& result, bool isOpponent);
+static void processHitResult(const HitResult* result, bool isOpponent);
 //
 // GameStatus listenForGameStatus();
 //

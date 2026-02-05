@@ -22,7 +22,7 @@ typedef struct ServerGameManager{
 ServerGameManager server_game_manager_create(int num_players, int listening_fd);
 void server_game_manager_destroy(ServerGameManager* self);
 void start_game(ServerGameManager* self);
-void gameLoop(ServerGameManager* self);
+void game_loop(ServerGameManager* self);
 void handle_player(Player player);
 void check_player_hit(ServerGameManager* self);
 

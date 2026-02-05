@@ -1,9 +1,7 @@
 #ifndef GAME_STATES_H
 #define GAME_STATES_H
 
-class GameStates {};
-
-enum class Ship {
+enum Ship {
     CARRIER,
     BATTLESHIP,
     CRUISER,
@@ -11,7 +9,7 @@ enum class Ship {
     PATROL_BOAT
 };
 
-enum class GameStatus {
+enum GameStatus {
     ONGOING,
     WON,
     LOST

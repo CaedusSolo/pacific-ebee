@@ -4,14 +4,14 @@
 #include "vector2d.h"
 #include "game_states.h"
 
-struct HitResult {
+typedef struct HitResult {
     enum Type {
         MISS,
         HIT,
         SINK
     } type;
     Vector2D position;
-    Ship shipSunk; // Valid only if type is SINK
-};
+    enum Ship ship_sunk; // Valid only if type is SINK
+} HitResult;
 
 #endif // !MESSAGES_H
