@@ -20,10 +20,10 @@ SERVER_TARGET = $(BINDIR)/server
 all: $(CLIENT_TARGET) $(SERVER_TARGET)
 
 $(CLIENT_TARGET): $(CLIENT_OBJ) | $(BINDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(SERVER_TARGET): $(SERVER_OBJ) | $(BINDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
