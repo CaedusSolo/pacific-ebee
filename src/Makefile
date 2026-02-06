@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -std=c99
+CFLAGS = -g -std=c99 -D_XOPEN_SOURCE=700 -pthread
 LDFLAGS = -lrt -lm
 OBJDIR = obj
 BINDIR = bin
@@ -7,7 +7,7 @@ BINDIR = bin
 # Source files
 CLIENT_SRC = client.c renderer.c game_client_manager.c
 SERVER_SRC = server.c server_connection.c server.c server_game_manager.c
-SHARED_SRC = vector2d.c connection.c cell.c battlefield.c
+SHARED_SRC = vector2d.c connection.c cell.c battlefield.c shared_memory.c
 
 # Object files
 CLIENT_OBJ = $(CLIENT_SRC:%.c=$(OBJDIR)/%.o) $(SHARED_SRC:%.c=$(OBJDIR)/%.o)
