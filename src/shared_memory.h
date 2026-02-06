@@ -4,6 +4,7 @@
 
 #include <pthread.h>
 #include "constants.h"
+#include "player.h"
 #include "vector2d.h"
 #include <semaphore.h>
 #include <stdbool.h>
@@ -26,9 +27,8 @@ typedef struct {
 
     pthread_barrier_t game_start_barrier;
 
-    char board[PLAYER_NUM][BATTLEFIELD_SIZE][BATTLEFIELD_SIZE];
     pid_t player_pids[PLAYER_NUM];
-    char player_names[PLAYER_NUM][256];
+    PlayerName player_names[PLAYER_NUM];
     bool player_connected[PLAYER_NUM];
 
     int player_scores[PLAYER_NUM];
