@@ -3,5 +3,6 @@
 
 #define BATTLEFIELD_SIZE 25
 #define PLAYER_NUM 3
+#define MAX_LOG_LENGTH 256
 
 #endif  // CONSTANTS_H
