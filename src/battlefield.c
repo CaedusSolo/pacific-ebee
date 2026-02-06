@@ -1,7 +1,10 @@
 #include "battlefield.h"
 #include "cell.h"
 #include "vector2d.h"
+#include "game_states.h"
 #include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
 
 Battlefield* Battlefield_new(int width, int height) {
     Battlefield* self = (Battlefield*)malloc(sizeof(Battlefield));
@@ -49,5 +52,94 @@ int Battlefield_getHeight(const Battlefield* self) {
 void Battlefield_updateCell(Battlefield* self, int x, int y, Cell cell) {
     if (x >= 0 && x < self->width && y >= 0 && y < self->height) {
         self->grid[y][x] = cell;
+    }
+}
+
+// Helper function to get ship size
+static int get_ship_size(enum Ship ship) {
+    switch(ship) {
+        case CARRIER: return 5;
+        case BATTLESHIP: return 4;
+        case CRUISER: return 3;
+        case DESTROYER: return 3;
+        case PATROL_BOAT: return 2;
+        default: return 0;
+    }
+}
+
+// Helper function to check if a ship can be placed at a given position for a specific player
+static bool can_place_ship(Battlefield* self, int x, int y, int size, bool horizontal, int player_index) {
+    // Check bounds
+    if (horizontal) {
+        if (x + size > self->width || y >= self->height) return false;
+    } else {
+        if (x >= self->width || y + size > self->height) return false;
+    }
+    
+    // Check if this player already has a ship in any of these cells
+    for (int i = 0; i < size; i++) {
+        int check_x = horizontal ? x + i : x;
+        int check_y = horizontal ? y : y + i;
+        Cell* cell = Battlefield_getCell(self, check_x, check_y);
+        if (cell && Cell_hasPlayerShip(cell, player_index)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Helper function to place a ship at a given position for a specific player
+static void place_ship(Battlefield* self, int x, int y, int size, bool horizontal, 
+                       enum Ship ship_type, int player_index) {
+    for (int i = 0; i < size; i++) {
+        int place_x = horizontal ? x + i : x;
+        int place_y = horizontal ? y : y + i;
+        Cell* cell = Battlefield_getCell(self, place_x, place_y);
+        if (cell) {
+            cell->has_ship[player_index] = true;
+            cell->ship_types[player_index] = ship_type;
+        }
+    }
+}
+
+// Main function to randomly place all ships for a player
+void Battlefield_placeShipsRandomly(Battlefield* self, int player_index) {
+    // Seed random number generator (should be called once per program)
+    static bool seeded = false;
+    if (!seeded) {
+        srand(time(NULL));
+        seeded = true;
+    }
+    
+    // Array of all ship types to place
+    enum Ship ships[] = {CARRIER, BATTLESHIP, CRUISER, DESTROYER, PATROL_BOAT};
+    int num_ships = sizeof(ships) / sizeof(ships[0]);
+    
+    // Place each ship
+    for (int i = 0; i < num_ships; i++) {
+        enum Ship ship = ships[i];
+        int size = get_ship_size(ship);
+        bool placed = false;
+        int max_attempts = 1000;  // Prevent infinite loop
+        
+        for (int attempt = 0; attempt < max_attempts && !placed; attempt++) {
+            // Random position and orientation
+            int x = rand() % self->width;
+            int y = rand() % self->height;
+            bool horizontal = rand() % 2;
+            
+            // Try to place the ship
+            if (can_place_ship(self, x, y, size, horizontal, player_index)) {
+                place_ship(self, x, y, size, horizontal, ship, player_index);
+                placed = true;
+            }
+        }
+        
+        // If we couldn't place a ship after max_attempts, something is wrong
+        if (!placed) {
+            // Could add error handling here
+            return;
+        }
     }
 }
