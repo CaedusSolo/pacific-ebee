@@ -12,23 +12,15 @@
 
 
 
-typedef struct GameClientManager {
+typedef struct GameClientData {
     Battlefield* battlefield;
     int fd;
+} GameClientData;
 
-
-} GameClientManager;
-
-GameClientManager game_client_manager_create(int fd);
-void game_loop(GameClientManager* game_client_manager);
-static void waitForGameReady();
-static void sendReadySignal();
-
-static char* askPlayerName();
-static void sendPlayerName(const PlayerName name);
-//
+GameClientData game_client_manager_create(int fd);
+void handle_turn(GameClientData* game_client_data);
+void handle_game_update(GameClientData* game_client_data);
 // void listenForNewBattlefield();
-// bool listenForFirstTurnDecision();
 //
 // Vector2D askShotCoords();
 // HitResult sendShot(Vector2D coords);
