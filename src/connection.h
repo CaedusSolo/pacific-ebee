@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-void send_message(const int fd, const char* outgoingMessage);
-char* listen_for_message(const int fd, size_t* output_len);
+void send_message(const int fd, const char* outgoingMessage, int len);
+size_t listen_for_message(const int fd, char* msg);
 
 #endif
