@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "constants.h"
 #include <stdio.h>
 
 void displayBanner(void) {
@@ -22,7 +23,7 @@ void displayBanner(void) {
 }
 
 
-void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE], bool isOurBoard){
+void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard){
     int size = 10 + (playerCount - 2) * 5;  // each player increase, grid increases by 5
     if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
 
@@ -43,7 +44,9 @@ void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE],
         printf("%2d ", r + 1);
 
         for (int c = 0; c < size; c++) {
-            char cell = battlefield[r][c];
+            int index = c + (r * BATTLEFIELD_SIZE);
+
+            char cell = battlefield[index];
 
             if ((cell == 'S' && isOurBoard) || cell == 'X' || cell == 'O') {
                 printf("%s", ANSI_BG_GREY); // attacked area turns grey

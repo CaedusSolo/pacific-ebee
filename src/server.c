@@ -1,5 +1,4 @@
 #include "battlefield.h"
-#include "connection.h"
 #include "constants.h"
 #include "player.h"
 #include "server_connection.h"
@@ -97,7 +96,6 @@ int main(int argc, char *argv[]) {
     // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
 
     Battlefield battlefield = battlefield_new(BATTLEFIELD_SIZE, BATTLEFIELD_SIZE);
-    global_shm->battlefield = battlefield;
 
     // Network Setup
     int listening_fd = server_connection_start(port);
@@ -116,7 +114,7 @@ int main(int argc, char *argv[]) {
         global_shm->player_connected[i] = true;
 
         // Generate ship placement on battlesfield
-        battlefield_place_ships_randomly(&global_shm->battlefield, i);
+        battlefield_place_ships_randomly(&battlefield, i);
 
         pid_t pid = fork();
 

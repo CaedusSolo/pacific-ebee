@@ -52,15 +52,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     printf("[Child %d] Game Started! Sending signal to client.\n", player_index);
     send_message(player.fd, GAME_START, strlen(GAME_START));
 
-
-    // 1MB buffer for battlefield size
-    char* battlefield_buffer = (char*)malloc(1000000);
-    int battlefield_buffer_len = battlefield_serialize(&shm->battlefield, battlefield_buffer);
-    send_message(
-        player.fd,
-        battlefield_buffer,
-        battlefield_buffer_len
-    );
+    sem_wait(&shm->get_ships_array[player_index]);
+    send_message(player.fd, shm->ships_array, BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+    sem_post(&shm->done_ships_array);
 
     // Send the player index
     char player_index_buffer[4];
@@ -124,6 +118,12 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 }
 
 void game_loop(SharedMemory *shm, Battlefield* battlefield) {
+    for (int i = 0; i < PLAYER_NUM; i++) {
+        sem_post(&shm->get_ships_array[i]);
+        battlefield_to_char_array(battlefield, i, shm->ships_array);
+        sem_wait(&shm->done_ships_array);
+    }
+
     int i = 0;
     while (i < 3) {
         // Wait for turn change to finish

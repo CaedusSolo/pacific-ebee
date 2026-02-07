@@ -16,7 +16,8 @@ int battlefield_get_width(const Battlefield* self);
 int battlefield_get_height(const Battlefield* self);
 void battlefield_update_cell(Battlefield* self, int x, int y, Cell cell);
 void battlefield_place_ships_randomly(Battlefield* self, int player_index);
-int battlefield_serialize(const Battlefield* bf, char* buffer);
-int battlefield_deserialize(Battlefield* bf, const char* buffer);
+void battlefield_to_char_array(const Battlefield* self, int player_index, char* char_array);
+// int battlefield_serialize(const Battlefield* bf, char* buffer);
+// int battlefield_deserialize(Battlefield* bf, const char* buffer);
 
 #endif
