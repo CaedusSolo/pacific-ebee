@@ -1,14 +1,34 @@
+#include <stdio.h>
+
 #include "game_client_manager.h"
 #include "messages.h"
 
 
-// GameClientManager::GameClientManager(Connection& serverConn, Renderer& renderer) : renderer(renderer), serverConn(serverConn) {}
+void handle_turn(GameClientData* game_client_data) {
+    int fd = game_client_data->fd;
 
-// GameClientManager::~GameClientManager() {
-//     // Destructor implementation
-// }
+    send_message(fd, READY_FOR_TURN, 15);
+    int x, y;
+    printf("Enter coords: ");
+    scanf("%d %d", &x, &y);
+    Vector2D pos = vector2d_create(x, y);
 
-void gameLoop(GameClientManager* game_client_manager) {
+    char pos_buffer[8];
+    vector2d_serialize(&pos, pos_buffer);
+    send_message(fd, pos_buffer, 8);
+}
+
+void handle_game_update(GameClientData* game_client_data) {
+    int fd = game_client_data->fd;
+
+    char update_msg[8];
+    size_t update_msg_len;
+    listen_for_message(fd, update_msg);
+    Vector2D ans = vector2d_deserialize(update_msg);
+    printf("Game update: (%d, %d)\n", ans.x, ans.y);
+}
+
+void gameLoop(GameClientData* game_client_manager) {
     // this->sendReadySignal();
     // this->waitForGameReady();
     //
