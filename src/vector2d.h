@@ -42,7 +42,7 @@ bool vector2d_not_equals(const Vector2D* a, const Vector2D* b);
 int vector2d_distance(const Vector2D* self, const Vector2D* other);
 
 // Serialization implementation
-char* vector2d_to_bytes(const Vector2D* self);
-Vector2D vector2d_from_bytes(const char* data);
+void vector2d_serialize(const Vector2D* self, char *buffer);
+Vector2D vector2d_deserialize(const char *buffer);
 
 #endif // !VECTOR_2D_H

@@ -8,10 +8,9 @@
 #include <string.h>
 
 
-void send_message(const int fd, const char* outgoing_message) {
-
+void send_message(const int fd, const char* outgoing_message, int len) {
     // 4 bytes
-    uint32_t message_length = strlen(outgoing_message);
+    uint32_t message_length = len;
 
     // convert to big endian
     uint32_t network_order_length = htonl(message_length);
@@ -39,14 +38,7 @@ void send_message(const int fd, const char* outgoing_message) {
     }
 }
 
-
-/**
-* @brief Receives message from TCP socket
-* @param fd Socket file descriptor
-* @param output_len Length of output
-* @return Pointer to allocated data (caller must free), or NULL on error
-*/
-char* listen_for_message(const int fd, size_t* output_len) {
+size_t listen_for_message(const int fd, char* msg_buffer) {
     // 4 bytes
     uint32_t network_order_length = 0;
 
@@ -59,34 +51,32 @@ char* listen_for_message(const int fd, size_t* output_len) {
     while (total_header_bytes_read < header_size) {
         ssize_t bytes_read_current_chunk = read(fd, header_buffer_pointer + total_header_bytes_read, header_size - total_header_bytes_read);
 
-        if (bytes_read_current_chunk == 0) return ""; // client closed connection
+        if (bytes_read_current_chunk == 0) return -1; // client closed connection
         if (bytes_read_current_chunk < 0) {
             perror("Read header failed. Aborting now.");
-            return "";
+            return -1;
         }
         total_header_bytes_read += bytes_read_current_chunk;
     }
 
     // convert to big endian
     uint32_t message_length = ntohl(network_order_length);
-    *output_len = message_length;
 
     // read message body
-    char* message_buffer = (char*)malloc(message_length);
     ssize_t total_message_bytes_read = 0;
 
     while (total_message_bytes_read < message_length) {
-        char* write_location = &message_buffer[total_message_bytes_read];
+        char* write_location = &msg_buffer[total_message_bytes_read];
         size_t bytes_to_read = message_length - total_message_bytes_read;
 
         ssize_t bytes_read_current_chunk = read(fd, write_location, bytes_to_read);
 
         if (bytes_read_current_chunk <= 0) {
             perror("Read body failed or connection closed mid-message");
-            return "";
+            return -1;
         }
         total_message_bytes_read += bytes_read_current_chunk;
     }
 
-    return message_buffer;
+    return message_length;
 }

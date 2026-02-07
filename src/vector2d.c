@@ -1,5 +1,8 @@
 #include "vector2d.h"
 
+#include <netinet/in.h>
+#include <stdint.h>
+#include <arpa/inet.h>  // for htonl/ntohl
 #include <math.h>
 
 
@@ -67,4 +70,30 @@ int vector2d_magnitude(const Vector2D* self) {
 Vector2D vector2d_normalized(const Vector2D* self) {
     int m = vector2d_magnitude(self);
     return vector2d_create(self->x / m, self->y / m);
+}
+
+// Serialize two uint32_t into byte array (network byte order)
+void vector2d_serialize(const Vector2D* self, char *buffer) {
+    uint32_t net_x = htonl(self->x);
+    uint32_t net_y = htonl(self->y);
+
+    // Copy to buffer
+    for (int i = 0; i < 4; i++) {
+        buffer[i] = (net_x >> (24 - i * 8)) & 0xFF;
+        buffer[i + 4] = (net_y >> (24 - i * 8)) & 0xFF;
+    }
+}
+
+// Deserialize byte array into two uint32_t (from network byte order)
+Vector2D vector2d_deserialize(const char *buffer) {
+    uint32_t net_x = 0;
+    uint32_t net_y = 0;
+
+    // Read from buffer
+    for (int i = 0; i < 4; i++) {
+        net_x |= ((uint32_t)buffer[i]) << (24 - i * 8);
+        net_y |= ((uint32_t)buffer[i + 4]) << (24 - i * 8);
+    }
+
+    return vector2d_create(ntohl(net_x), ntohl(net_y));
 }

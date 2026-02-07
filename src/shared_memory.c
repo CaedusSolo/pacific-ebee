@@ -38,6 +38,13 @@ SharedMemory* shared_memory_init(int num_players) {
     // Semaphores (The '1' means shared between processes)
     sem_init(&shm->log_count_sem, 1, 0);
     sem_init(&shm->complete_turn_sem, 1, 0);
+    sem_init(&shm->change_turn_sem, 1, 0);
+    sem_init(&shm->notify_turn_sem, 1, 0);
+    sem_init(&shm->turn_notified_sem, 1, 0);
+    sem_init(&shm->client_shot, 1, 0);
+    sem_init(&shm->game_update, 1, 0);
+    sem_init(&shm->complete_game_update, 1, 0);
+    sem_init(&shm->game_loop, 1, 0);
 
     for (int i = 0; i < PLAYER_NUM; i++) {
         sem_init(&shm->turn_sem[i], 1, 0);

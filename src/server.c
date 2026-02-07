@@ -1,7 +1,10 @@
 #include "connection.h"
+#include "player.h"
 #include "server_connection.h"
 #include "server_game_manager.h"
 #include "shared_memory.h"
+#include <semaphore.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -42,12 +45,21 @@ void* scheduler_thread(void* arg) {
         printf("[Scheduler] Signaling Player %d\n", current);
         sem_post(&shm->turn_sem[current]);
 
+        // Signal main process on turn change
+        sem_post(&shm->change_turn_sem);
+
         // Wait for turn completion
         sem_wait(&shm->complete_turn_sem);
 
         // Next turn logic (Round Robin)
         shm->current_player_index = (current + 1) % shm->player_num;
     }
+
+    // End the game
+    for (int i = 0; i < shm->player_num; i++) {
+        sem_post(&shm->turn_sem[i]);
+    }
+
     return NULL;
 }
 
@@ -80,8 +92,7 @@ int main(int argc, char *argv[]) {
 
     // 2. Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
-    pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
-    pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
+    // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
 
     // 3. Network Setup
     int listening_fd = server_connection_start(port);
@@ -111,6 +122,11 @@ int main(int argc, char *argv[]) {
             memset(&current_player, 0, sizeof(Player));
             current_player.fd = client_fd;
 
+            PlayerName name;
+            listen_for_message(client_fd, name);
+            strcpy(current_player.name, name);
+            strcpy(global_shm->player_names[i], name);
+
             handle_player(current_player, i, global_shm);
             // pass semaphore details to child process
             exit(0);
@@ -124,15 +140,13 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // 5. Start Game
     global_shm->game_running = true;
     printf("[Server] All players connected. Game Starting.\n");
+    pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
+    game_loop(global_shm);
 
-    // Parent waits for threads (Server runs until killed or game over)
+    // pthread_join(log_tid, NULL);
     pthread_join(sched_tid, NULL);
-    pthread_join(log_tid, NULL);
 
     return 0;
 }
-
-
