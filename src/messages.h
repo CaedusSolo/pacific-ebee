@@ -20,4 +20,7 @@ typedef struct HitResult {
     enum Ship ship_sunk; // Valid only if type is SINK
 } HitResult;
 
+void int_serialize(char* buffer, int value);
+int int_deserialize(const char* buffer);
+
 #endif // !MESSAGES_H

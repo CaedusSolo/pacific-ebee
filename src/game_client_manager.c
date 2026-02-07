@@ -8,10 +8,17 @@
 
 
 void handle_game_start(GameClientData* game_client_data) {
+    // Get battlefield
     char* bf_buffer = (char*)malloc(1000000);
     listen_for_message(game_client_data->fd, bf_buffer);
     battlefield_deserialize(&game_client_data->battlefield, bf_buffer);
     printf("Battlefield acquired!\n");
+    free(bf_buffer);
+
+    char player_index_buffer[4];
+    listen_for_message(game_client_data->fd, player_index_buffer);
+    game_client_data->player_index = int_deserialize(player_index_buffer);
+    printf("Player index: %d\n", game_client_data->player_index);
 }
 
 void handle_turn(GameClientData* game_client_data) {

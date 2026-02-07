@@ -7,7 +7,7 @@ BINDIR = bin
 # Source files
 CLIENT_SRC = client.c renderer.c game_client_manager.c
 SERVER_SRC = server.c server_connection.c server.c server_game_manager.c
-SHARED_SRC = vector2d.c connection.c cell.c battlefield.c shared_memory.c
+SHARED_SRC = vector2d.c connection.c cell.c battlefield.c shared_memory.c messages.c
 TEST_PLACEMENT_SRC = test_ship_placement.c
 
 # Object files
