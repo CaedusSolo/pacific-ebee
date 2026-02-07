@@ -23,8 +23,7 @@ void displayBanner(void) {
 }
 
 
-void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard){
-    int size = 10 + (playerCount - 2) * 5;  // each player increase, grid increases by 5
+void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard){
     if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
 
     printf("   ");
@@ -49,9 +48,9 @@ void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE]
             char cell = battlefield[index];
 
             if ((cell == 'S' && isOurBoard) || cell == 'X' || cell == 'O') {
-                printf("%s", ANSI_BG_GREY); // attacked area turns grey
-            } else {
                 printf("%s", ANSI_BG_BLUE); // colour the bg blue
+            } else {
+                printf("%s", ANSI_BG_GREY); // attacked area turns grey
             }
 
             if (cell == 'X') {
