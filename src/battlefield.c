@@ -1,24 +1,27 @@
 #include "battlefield.h"
 #include "cell.h"
+#include "constants.h"
 #include "vector2d.h"
 #include "game_states.h"
+#include <netinet/in.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <arpa/inet.h>
 
-Battlefield* battlefield_new(int width, int height) {
-    Battlefield* self = (Battlefield*)malloc(sizeof(Battlefield));
-    self->width = width;
-    self->height = height;
+Battlefield battlefield_new(int width, int height) {
+    Battlefield self;
+    self.width = width;
+    self.height = height;
 
-    self->grid = (Cell**)malloc(height * sizeof(Cell*));
+    self.grid = (Cell**)malloc(height * sizeof(Cell*));
     for (int i = 0; i < height; ++i) {
         // iterate each row
-        self->grid[i] = (Cell*)malloc(width * sizeof(Cell));
+        self.grid[i] = (Cell*)malloc(width * sizeof(Cell));
         for (int j = 0; j < width; ++j) {
             // iterate each column
             // since j is each col, so its x, and i is each row so its y
-            self->grid[i][j] = *cell_new_with_coordinates(vector2d_create(j, i));
+            self.grid[i][j] = *cell_new_with_coordinates(vector2d_create(j, i));
         }
     }
     return self;
@@ -142,4 +145,96 @@ void battlefield_place_ships_randomly(Battlefield* self, int player_index) {
             return;
         }
     }
+}
+
+// Serialize battlefield to provided buffer
+// Returns serialized size, or -1 on error
+int battlefield_serialize(const Battlefield* bf, char* buffer) {
+    if (!bf || !bf->grid || !buffer) return -1;
+
+    int cell_size = 8 + (PLAYER_NUM * 4) + PLAYER_NUM;
+    int total_size = 8 + (bf->width * bf->height * cell_size);
+
+    char* ptr = buffer;
+
+    // Width and height
+    *(uint32_t*)ptr = htonl(bf->width);
+    ptr += 4;
+    *(uint32_t*)ptr = htonl(bf->height);
+    ptr += 4;
+
+    // Each cell
+    for (int y = 0; y < bf->height; y++) {
+        for (int x = 0; x < bf->width; x++) {
+            Cell* cell = &bf->grid[y][x];
+
+            *(uint32_t*)ptr = htonl(cell->coordinates.x);
+            ptr += 4;
+            *(uint32_t*)ptr = htonl(cell->coordinates.y);
+            ptr += 4;
+
+            for (int p = 0; p < PLAYER_NUM; p++) {
+                *(uint32_t*)ptr = htonl((uint32_t)cell->ship_types[p]);
+                ptr += 4;
+            }
+
+            for (int p = 0; p < PLAYER_NUM; p++) {
+                *ptr++ = cell->has_ship[p] ? 1 : 0;
+            }
+        }
+    }
+
+    return total_size;
+}
+
+// Deserialize battlefield from byte buffer
+// Returns 0 on success, -1 on error
+// Deserialize battlefield from buffer (allocates grid)
+// Returns 0 on success, -1 on error
+int battlefield_deserialize(Battlefield* bf, const char* buffer) {
+    const char* ptr = buffer;
+
+    bf->width = ntohl(*(uint32_t*)ptr);
+    ptr += 4;
+    bf->height = ntohl(*(uint32_t*)ptr);
+    ptr += 4;
+
+    int cell_size = 8 + (PLAYER_NUM * 4) + PLAYER_NUM;
+    int expected_size = 8 + (bf->width * bf->height * cell_size);
+
+    // Allocate grid
+    bf->grid = (Cell**)malloc(bf->height * sizeof(Cell*));
+    if (!bf->grid) return -1;
+
+    for (int y = 0; y < bf->height; y++) {
+        bf->grid[y] = (Cell*)malloc(bf->width * sizeof(Cell));
+        if (!bf->grid[y]) {
+            for (int i = 0; i < y; i++) free(bf->grid[i]);
+            free(bf->grid);
+            return -1;
+        }
+    }
+
+    // Deserialize cells
+    for (int y = 0; y < bf->height; y++) {
+        for (int x = 0; x < bf->width; x++) {
+            Cell* cell = &bf->grid[y][x];
+
+            cell->coordinates.x = ntohl(*(uint32_t*)ptr);
+            ptr += 4;
+            cell->coordinates.y = ntohl(*(uint32_t*)ptr);
+            ptr += 4;
+
+            for (int p = 0; p < PLAYER_NUM; p++) {
+                cell->ship_types[p] = (enum Ship)ntohl(*(uint32_t*)ptr);
+                ptr += 4;
+            }
+
+            for (int p = 0; p < PLAYER_NUM; p++) {
+                cell->has_ship[p] = (*ptr++ != 0);
+            }
+        }
+    }
+
+    return 0;
 }
