@@ -181,6 +181,9 @@ int battlefield_serialize(const Battlefield* bf, char* buffer) {
             for (int p = 0; p < PLAYER_NUM; p++) {
                 *ptr++ = cell->has_ship[p] ? 1 : 0;
             }
+
+            *ptr = cell->is_shot ? 1 : 0;
+            ptr++;
         }
     }
 
@@ -233,6 +236,8 @@ int battlefield_deserialize(Battlefield* bf, const char* buffer) {
             for (int p = 0; p < PLAYER_NUM; p++) {
                 cell->has_ship[p] = (*ptr++ != 0);
             }
+
+            cell->is_shot = *ptr;
         }
     }
 
