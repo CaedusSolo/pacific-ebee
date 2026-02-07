@@ -15,6 +15,7 @@
 typedef struct GameClientData {
     Battlefield battlefield;
     int fd;
+    int player_index;
 } GameClientData;
 
 GameClientData game_client_manager_create(int fd);

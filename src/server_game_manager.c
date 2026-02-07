@@ -62,6 +62,11 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         battlefield_buffer_len
     );
 
+    // Send the player index
+    char player_index_buffer[4];
+    int_serialize(player_index_buffer, player_index);
+    send_message(player.fd, player_index_buffer, 4);
+
     // Separate thread to send game update states
     ThreadArgs thr_args = {
         .shm = shm,
