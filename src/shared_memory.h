@@ -30,7 +30,6 @@ typedef struct {
     sem_t notify_turn_sem;
     sem_t turn_notified_sem;
 
-    sem_t turn_sem[PLAYER_NUM];
     sem_t change_turn_sem;
     sem_t complete_turn_sem;
 
@@ -40,16 +39,19 @@ typedef struct {
 
     sem_t game_loop;
 
+    sem_t done_ships_array;
+
     pthread_barrier_t game_start_barrier;
+
+    sem_t turn_sem[PLAYER_NUM];
+    sem_t get_ships_array[PLAYER_NUM];
 
     pid_t player_pids[PLAYER_NUM];
     PlayerName player_names[PLAYER_NUM];
     bool player_connected[PLAYER_NUM];
 
     int player_scores[PLAYER_NUM];
-
-    Battlefield battlefield;
-
+    char ships_array[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
 } SharedMemory;
 
 SharedMemory* shared_memory_init(int num_players);

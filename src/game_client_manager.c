@@ -2,18 +2,16 @@
 #include <stdlib.h>
 
 #include "game_client_manager.h"
-#include "battlefield.h"
 #include "connection.h"
+#include "constants.h"
 #include "messages.h"
 
 
 void handle_game_start(GameClientData* game_client_data) {
     // Get battlefield
-    char* bf_buffer = (char*)malloc(1000000);
+    char bf_buffer[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
     listen_for_message(game_client_data->fd, bf_buffer);
-    battlefield_deserialize(&game_client_data->battlefield, bf_buffer);
     printf("Battlefield acquired!\n");
-    free(bf_buffer);
 
     char player_index_buffer[4];
     listen_for_message(game_client_data->fd, player_index_buffer);
