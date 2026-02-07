@@ -39,6 +39,7 @@ int main (int argc, char *argv[]) {
     };
 
     char buffer[100];
+    memset(buffer, 0, 100);
     size_t msg_len;
 
     while(1) {
@@ -48,7 +49,7 @@ int main (int argc, char *argv[]) {
         printf("%s\n", buffer);
 
         if (!strcmp(buffer, GAME_START)) {
-            continue;
+            handle_game_start(&game_data);
         }
         else if (!strcmp(buffer, YOUR_TURN)) {
             handle_turn(&game_data);

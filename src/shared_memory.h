@@ -1,5 +1,6 @@
 #ifndef SHARED_MEMORY_H
 #define SHARED_MEMORY_H
+#include "battlefield.h"
 #define _XOPEN_SOURCE 700
 
 #include <pthread.h>
@@ -46,6 +47,8 @@ typedef struct {
     bool player_connected[PLAYER_NUM];
 
     int player_scores[PLAYER_NUM];
+
+    Battlefield battlefield;
 
 } SharedMemory;
 
