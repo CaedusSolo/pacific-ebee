@@ -1,6 +1,26 @@
 #include "renderer.h"
 #include <stdio.h>
 
+void displayBanner(void) {
+    printf(ANSI_BLUE " _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+    printf("|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|\n" ANSI_RESET);
+    printf("                                                                                           \n");
+    printf("       ____    ____     __   ____  _____  ____     __         ___  ____     ___    ___       \n");
+    printf("      |    \\ /    |   /  ] |    ||     ||    |   /  ]       /  _]|    \\  /  _]  /  _]      \n");
+    printf("      |  o  )|  o  |  /  /   |  | |   __| |  |   /  /       /  [_ |  o  ) /  [_  /  [_       \n");
+    printf("      |   _/ |     | /  /    |  | |  |_   |  |  /  /       |    _]|     ||    _]|    _]      \n");
+    printf("      |  |   |  _  |/   \\_  |  | |   _]  |  | /   \\_     |   [_ |  O  ||   [_ |   [_       \n");
+    printf("      |  |   |  |  |\\     | |  | |  |    |  | \\     |    |     ||     ||     ||     |      \n");
+    printf("      |__|   |__|__| \\____||____||__|   |____| \\____|    |_____||_____||_____||_____|      \n");
+    printf("                                                                                           \n");
+    printf("                                                                                           \n");
+    printf("                                _______/_____\\_______\\_____                                \n");
+    printf("                                \\              < < <       |                               \n");
+    printf("                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                           \n");
+    printf(ANSI_BLUE " _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+    printf("|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|\n" ANSI_RESET);
+}
+
 
 void grid(int playerCount, char battlefield[BATTLEFIELD_SIZE][BATTLEFIELD_SIZE], bool isOurBoard){
     int size = 10 + (playerCount - 2) * 5;  // each player increase, grid increases by 5
