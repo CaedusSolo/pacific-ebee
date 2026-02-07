@@ -1,4 +1,5 @@
 #include "server_game_manager.h"
+#include "battlefield.h"
 #include "connection.h"
 #include "constants.h"
 #include "messages.h"
@@ -30,7 +31,7 @@ void* game_update_thread(void *arg) {
     // Might be a synchronization problem later
     while (shm->current_player_index != our_index) {
         sem_wait(&shm->game_update);
-        send_message(fd, "UPDATE", 7);
+        send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
         vector2d_serialize(&shm->shoot_position, msg);
         send_message(fd, msg, 8);
     }
@@ -39,12 +40,27 @@ void* game_update_thread(void *arg) {
 }
 
 void handle_player(Player player, int player_index, SharedMemory* shm) {
+    PlayerName name;
+    listen_for_message(player.fd, name);
+    strcpy(player.name, name);
+    strcpy(shm->player_names[player_index], name);
+
     printf("[Child %d] Connected. Waiting for other players...\n", player_index);
 
     pthread_barrier_wait(&shm->game_start_barrier);
 
     printf("[Child %d] Game Started! Sending signal to client.\n", player_index);
-    send_message(player.fd, "GAME_START", 11);
+    send_message(player.fd, GAME_START, strlen(GAME_START));
+
+
+    // 1MB buffer for battlefield size
+    char* battlefield_buffer = (char*)malloc(1000000);
+    int battlefield_buffer_len = battlefield_serialize(&shm->battlefield, battlefield_buffer);
+    send_message(
+        player.fd,
+        battlefield_buffer,
+        battlefield_buffer_len
+    );
 
     // Separate thread to send game update states
     ThreadArgs thr_args = {
@@ -62,7 +78,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
-            send_message(player.fd, "GAME_OVER", 10);
+            send_message(player.fd, GAME_OVER, strlen(GAME_OVER));
             break;
         }
 
@@ -73,7 +89,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 
         // Notify client it is their turn
         sem_wait(&shm->notify_turn_sem);
-        send_message(player.fd, YOUR_TURN, 10);
+        send_message(player.fd, YOUR_TURN, strlen(YOUR_TURN));
 
         char resp[20];
         // do {
@@ -90,27 +106,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         printf("[Child %d] Player shot!\n", player_index);
         sem_post(&shm->client_shot);
 
-        // if (!input) {
-        //     printf("[Child %d] Client disconnected.\n", player_index);
-        //     shm->player_connected[player_index] = false;
-        //     sem_post(&shm->complete_turn_sem); // Don't hang the scheduler
-        //     break;
-        // }
-
-
         sem_wait(&shm->complete_game_update);
-
-        // // --- CRITICAL SECTION (Update Shared Memory) ---
-        // // Lock mutex to prevent race conditions while updating the board
-        // pthread_mutex_lock(&shm->game_state_mutex);
-        //
-        // printf("[Child %d] Received move: %s\n", player_index, input);
-        //
-        // pthread_mutex_unlock(&shm->game_state_mutex);
-        //
-        // // Send result back to client
-        // send_message(player.fd, "RESULT: PROCESSED");
-        // free(input);
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
@@ -122,7 +118,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     printf("[Child %d] Exiting.\n", player_index);
 }
 
-void game_loop(SharedMemory *shm){
+void game_loop(SharedMemory *shm, Battlefield* battlefield) {
     int i = 0;
     while (i < 3) {
         // Wait for turn change to finish
@@ -153,17 +149,3 @@ void game_loop(SharedMemory *shm){
         sem_post(&shm->complete_game_update);
     }
 }
-
-
-// vector<Player*> ServerGameManager::checkPlayerHit(Vector2D target){
-//     vector<Player*> hitPlayers;
-//     for(int i = 0;i<numPlayers;i++){
-//         // if a player is hit, return the player hit
-//         // this assumes that the hit player's ship/coordinate hitting will be marked
-//         // and also the hit coord will be updated in every player's grid
-//         if(i!= currentPlayerIndex && players[i].checkHit(target)){
-//             hitPlayers.push_back(&players[i]);
-//         }
-//     }
-//     return hitPlayers;
-// }
