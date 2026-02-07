@@ -13,11 +13,12 @@
 
 
 typedef struct GameClientData {
-    Battlefield* battlefield;
+    Battlefield battlefield;
     int fd;
 } GameClientData;
 
 GameClientData game_client_manager_create(int fd);
+void handle_game_start(GameClientData* game_client_data);
 void handle_turn(GameClientData* game_client_data);
 void handle_game_update(GameClientData* game_client_data);
 // void listenForNewBattlefield();

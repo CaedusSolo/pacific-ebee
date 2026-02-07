@@ -1,8 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "game_client_manager.h"
+#include "battlefield.h"
+#include "connection.h"
 #include "messages.h"
 
+
+void handle_game_start(GameClientData* game_client_data) {
+    char* bf_buffer = (char*)malloc(1000000);
+    listen_for_message(game_client_data->fd, bf_buffer);
+    battlefield_deserialize(&game_client_data->battlefield, bf_buffer);
+    printf("Battlefield acquired!\n");
+}
 
 void handle_turn(GameClientData* game_client_data) {
     int fd = game_client_data->fd;
