@@ -47,16 +47,16 @@ int main (int argc, char *argv[]) {
             buffer[msg_len + 1] = '\0';
         printf("%s\n", buffer);
 
-        if (!strcmp(buffer, "GAME_START")) {
+        if (!strcmp(buffer, GAME_START)) {
             continue;
         }
         else if (!strcmp(buffer, YOUR_TURN)) {
             handle_turn(&game_data);
         }
-        else if (!strcmp(buffer, "UPDATE")) {
+        else if (!strcmp(buffer, GAME_UPDATE)) {
             handle_game_update(&game_data);
         }
-        else if (!strcmp(buffer, "GAME_OVER")) {
+        else if (!strcmp(buffer, GAME_OVER)) {
             break;
         }
 
