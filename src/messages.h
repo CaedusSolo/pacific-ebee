@@ -4,6 +4,9 @@
 #include "vector2d.h"
 #include "game_states.h"
 
+#define YOUR_TURN "YOUR_TURN"
+#define READY_FOR_TURN "READY_FOR_TURN"
+
 typedef struct HitResult {
     enum Type {
         MISS,
