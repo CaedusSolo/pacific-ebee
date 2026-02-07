@@ -8,21 +8,29 @@ BINDIR = bin
 CLIENT_SRC = client.c renderer.c game_client_manager.c
 SERVER_SRC = server.c server_connection.c server.c server_game_manager.c
 SHARED_SRC = vector2d.c connection.c cell.c battlefield.c shared_memory.c
+TEST_PLACEMENT_SRC = test_ship_placement.c
 
 # Object files
 CLIENT_OBJ = $(CLIENT_SRC:%.c=$(OBJDIR)/%.o) $(SHARED_SRC:%.c=$(OBJDIR)/%.o)
 SERVER_OBJ = $(SERVER_SRC:%.c=$(OBJDIR)/%.o) $(SHARED_SRC:%.c=$(OBJDIR)/%.o)
+TEST_PLACEMENT_OBJ = $(OBJDIR)/test_ship_placement.o $(OBJDIR)/vector2d.o $(OBJDIR)/cell.o $(OBJDIR)/battlefield.o
 
 CLIENT_TARGET = $(BINDIR)/client
 SERVER_TARGET = $(BINDIR)/server
+TEST_PLACEMENT_TARGET = $(BINDIR)/test_ship_placement
 
 # Targets
 all: $(CLIENT_TARGET) $(SERVER_TARGET)
+
+test: $(TEST_PLACEMENT_TARGET)
 
 $(CLIENT_TARGET): $(CLIENT_OBJ) | $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(SERVER_TARGET): $(SERVER_OBJ) | $(BINDIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(TEST_PLACEMENT_TARGET): $(TEST_PLACEMENT_OBJ) | $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.c | $(OBJDIR)
@@ -35,6 +43,6 @@ $(BINDIR):
 	mkdir -p $(BINDIR)
 
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)/client $(BINDIR)/server
+	rm -rf $(OBJDIR) $(BINDIR)/client $(BINDIR)/server $(BINDIR)/test_ship_placement
 
-.PHONY: all clean
+.PHONY: all test clean

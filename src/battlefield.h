@@ -15,5 +15,6 @@ Cell* Battlefield_getCell(const Battlefield* self, int x, int y);
 int Battlefield_getWidth(const Battlefield* self);
 int Battlefield_getHeight(const Battlefield* self);
 void Battlefield_updateCell(Battlefield* self, int x, int y, Cell cell);
+void Battlefield_placeShipsRandomly(Battlefield* self, int player_index);
 
 #endif
