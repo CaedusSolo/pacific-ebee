@@ -161,6 +161,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     while (1) {
         // --- WAIT FOR TURN ---
         sem_wait(&shm->turn_sem[player_index]);
+        log_event(shm, "TURN: %s", shm->players[shm->current_player_index].name);
 
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
