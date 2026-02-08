@@ -72,7 +72,7 @@ static bool can_place_ship(Battlefield* self, int x, int y, int size, bool horiz
         int check_x = horizontal ? x + i : x;
         int check_y = horizontal ? y : y + i;
         Cell* cell = battlefield_get_cell(self, check_x, check_y);
-        if (cell && cell_has_player_ship(cell, player_index)) {
+        if (cell && !cell_is_empty(cell)) {
             return false;
         }
     }
