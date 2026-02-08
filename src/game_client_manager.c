@@ -83,6 +83,7 @@ void client_wait_for_hit_result(GameClientData* game_data) {
     char new_value;
     char* attacker_name;
     char* victim_name;
+    char msg[200];
 
     if (hr.attacker_index != game_data->our_index)
         attacker_name = game_data->player_names[hr.attacker_index];
@@ -96,25 +97,25 @@ void client_wait_for_hit_result(GameClientData* game_data) {
 
     switch (hr.type) {
         case MISS:
-        new_value = BF_OTHER_ATTACK;
-        game_client_data_set_board_char(game_data, hr.position, new_value);
-        grid(game_data->battlefield_size, game_data->game_board);
-        printf("%s missed!\n", attacker_name);
-        break;
+            if (hr.attacker_index == game_data->our_index)
+                new_value = BF_OUR_ATTACK;
+            else
+                new_value = BF_OTHER_ATTACK;
+            sprintf(msg, "%s missed!\n", attacker_name);
+            break;
 
         case HIT:
-        if (hr.victim_index == game_data->our_index) {
-            new_value = BF_OUR_SHIP_ATTACKED;
-        }
-        else {
-            new_value = BF_OTHER_ATTACK;
-        }
-        game_client_data_set_board_char(game_data, hr.position, new_value);
-        grid(game_data->battlefield_size, game_data->game_board);
-        printf("%s hit %s ship!\n", attacker_name, victim_name);
-        break;
+            if (hr.victim_index == game_data->our_index)
+                new_value = BF_OUR_SHIP_ATTACKED;
+            else
+                new_value = BF_OTHER_SHIP_ATTACKED;
+            sprintf(msg, "%s hit %s ship!\n", attacker_name, victim_name);
+            break;
     }
 
+    game_client_data_set_board_char(game_data, hr.position, new_value);
+    grid(game_data->battlefield_size, game_data->game_board);
+    printf("%s\n", msg);
 }
 
 void game_client_data_set_board_char(GameClientData* self, Vector2D pos, char val) {
