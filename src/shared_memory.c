@@ -49,7 +49,7 @@ SharedMemory* shared_memory_init(int num_players) {
     sem_init(&shm->game_loop, 1, 0);
     sem_init(&shm->done_ships_array, 1, 0);
 
-    for (int i = 0; i < PLAYER_NUM; i++) {
+    for (int i = 0; i < MAX_PLAYER_NUM; i++) {
         sem_init(&shm->turn_sem[i], 1, 0);
         sem_init(&shm->get_ships_array[i], 1, 0);
     }
@@ -72,7 +72,7 @@ void shared_memory_destroy(SharedMemory* shm) {
 
     sem_destroy(&shm->log_count_sem);
     sem_destroy(&shm->complete_turn_sem);
-    for(int i=0; i<PLAYER_NUM; i++) sem_destroy(&shm->turn_sem[i]);
+    for(int i=0; i<MAX_PLAYER_NUM; i++) sem_destroy(&shm->turn_sem[i]);
 
     munmap(shm, sizeof(SharedMemory));
 }

@@ -23,9 +23,7 @@ void displayBanner(void) {
 }
 
 
-void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard){
-    if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
-
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE]){
     printf("   ");
 
     // column
@@ -43,27 +41,25 @@ void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool 
         printf("%2d ", r + 1);
 
         for (int c = 0; c < size; c++) {
-            int index = c + (r * BATTLEFIELD_SIZE);
+            int index = c + (r * size);
 
             char cell = battlefield[index];
 
-            if ((cell == 'S' && isOurBoard) || cell == 'X' || cell == 'O') {
-                printf("%s", ANSI_BG_BLUE); // colour the bg blue
-            } else {
-                printf("%s", ANSI_BG_GREY); // attacked area turns grey
-            }
-
-            if (cell == 'X') {
-                printf("%s%s X ", ANSI_RED, ANSI_BOLD);
-            }
-            else if (cell == 'O') {
-                printf(" O ");
-            }
-            else if (cell == 'S' && isOurBoard) {
-                printf(" S "); // placement of the ships
-            }
-            else {
-                printf(" . ");
+            switch (cell) {
+                case BF_OTHER_ATTACK:
+                    printf("%s%s X ", ANSI_RED, ANSI_BOLD);
+                	break;
+                case BF_OUR_ATTACK:
+                    printf("%s X ", ANSI_GREEN);
+                	break;
+                case BF_OUR_SHIP:
+                    printf("%s%s S ", ANSI_BG_BLUE, ANSI_BLUE);
+                	break;
+                case BF_OUR_SHIP_ATTACKED:
+                    printf("%s%s%s X ", ANSI_BG_BLUE, ANSI_RED, ANSI_BOLD);
+                    break;
+                default:
+                    printf(" . ");
             }
 
             printf("%s", ANSI_RESET_ALL);

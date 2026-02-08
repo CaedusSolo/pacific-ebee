@@ -14,10 +14,8 @@ typedef struct HitResult {
     enum Type {
         MISS,
         HIT,
-        SINK
     } type;
     Vector2D position;
-    enum Ship ship_sunk; // Valid only if type is SINK
     int attacker_index;
     int victim_index;
 } HitResult;

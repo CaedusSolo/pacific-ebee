@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#define LOSE_EARLY 1
+
 
 typedef struct ThreadArgs {
     SharedMemory* shm;
@@ -82,14 +84,45 @@ void* game_update_thread(void *arg) {
     // Might be a synchronization problem later
     while (1) {
         sem_wait(&shm->game_update);
-        if (shm->current_player_index == our_index)
-            continue;
-        send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
+        if (shm->current_player_index != our_index)
+            send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
         int msg_len = hitresult_serialize(&shm->hit_result, msg);
         send_message(fd, msg, msg_len);
+        sem_post(&shm->complete_game_update);
     }
 
     return NULL;
+}
+
+void send_init_data(Player player, int player_index, SharedMemory* shm) {
+    // Send ship arrays
+    // Get the main process to generate the array
+    sem_wait(&shm->get_ships_array[player_index]);
+    size_t ships_array_len = shm->battlefield_size * shm->battlefield_size;
+    send_message(player.fd, shm->ships_array, ships_array_len);
+    sem_post(&shm->done_ships_array);
+
+    // Send player count
+    char player_num_buffer[4];
+    int_serialize(player_num_buffer, shm->player_num);
+    send_message(player.fd, player_num_buffer, 4);
+
+    // Send player index
+    char their_index_buffer[4];
+    int_serialize(their_index_buffer, player_index);
+    send_message(player.fd, their_index_buffer, 4);
+
+    // Send all players name
+    char names_buffer[256 * shm->player_num];
+    for (int i = 0; i < shm->player_num; i++) {
+        memcpy(names_buffer + (i*256), shm->players[i].name, 256);
+    }
+    send_message(player.fd, names_buffer, 256*shm->player_num);
+
+    // Send the battlefield size
+    char battlefield_size_buffer[4];
+    int_serialize(battlefield_size_buffer, shm->battlefield_size);
+    send_message(player.fd, battlefield_size_buffer, 4);
 }
 
 void handle_player(Player player, int player_index, SharedMemory* shm) {
@@ -110,23 +143,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     printf("[Child %d] Game Started! Sending signal to client.\n", player_index);
     send_message(player.fd, GAME_START, strlen(GAME_START));
 
-    // Send ship arrays
-    // Get the main process to generate the array
-    sem_wait(&shm->get_ships_array[player_index]);
-    send_message(player.fd, shm->ships_array, BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
-    sem_post(&shm->done_ships_array);
-
-    // Send all players name
-    char names_buffer[256 * PLAYER_NUM];
-    for (int i = 0; i < PLAYER_NUM; i++) {
-        memcpy(names_buffer + (i*256), shm->players[i].name, 256);
-    }
-    send_message(player.fd, names_buffer, 256*PLAYER_NUM);
-
-    // Send the player index
-    char player_index_buffer[4];
-    int_serialize(player_index_buffer, player_index);
-    send_message(player.fd, player_index_buffer, 4);
+    send_init_data(player, player_index, shm);
 
     // Separate thread to send game update states
     ThreadArgs thr_args = {
@@ -145,6 +162,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
             send_message(player.fd, GAME_OVER, strlen(GAME_OVER));
+            char score_buffer[4];
+            int_serialize(score_buffer, shm->players[player_index].score);
+            send_message(player.fd, score_buffer, 4);
             break;
         }
 
@@ -179,7 +199,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         printf("[Child %d] Player shot!\n", player_index);
         sem_post(&shm->client_shot);
 
-        sem_wait(&shm->complete_game_update);
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_wait(&shm->complete_game_update);
+        }
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
@@ -192,7 +214,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 }
 
 void game_loop(SharedMemory *shm, Battlefield* battlefield) {
-    for (int i = 0; i < PLAYER_NUM; i++) {
+    for (int i = 0; i < shm->player_num; i++) {
         battlefield_to_char_array(battlefield, i, shm->ships_array);
         sem_post(&shm->get_ships_array[i]);
         sem_wait(&shm->done_ships_array);
@@ -201,8 +223,9 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
     log_event(shm, "GAME START: All players ready.");
     log_battlefield(shm, battlefield);
 
-    int i = 0;
-    while (i < 3) { // Keeping original logic
+    int kk = 0;
+
+    while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
 
@@ -210,15 +233,13 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->turn_notified_sem);
 
         sem_wait(&shm->client_shot);
-        // Notify all child processes
-        for (int k = 0; k < PLAYER_NUM-1; k++) {
-            sem_post(&shm->game_update);
-        }
+
+        Player* attacker = &shm->players[shm->current_player_index];
 
         // Update the battlefield
         printf("Player %d (%s) shot at (%d,%d)\n",
                shm->current_player_index,
-               shm->players[shm->current_player_index].name,
+               attacker->name,
                shm->shoot_position.x,
                shm->shoot_position.y
         );
@@ -232,50 +253,62 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         shm->hit_result.type = MISS;
         shm->hit_result.attacker_index = shm->current_player_index;
 
-        char* attacker_name = shm->players[shm->current_player_index].name;
         bool hit_detected = false;
 
         // Check who got shot
-        for (int p = 0; p < PLAYER_NUM; p++) {
-            if (!cell || !cell->has_ship[p])
+        for (int i = 0; i < shm->player_num; i++) {
+            if (!cell || !cell->has_ship[i])
                 continue;
 
-            enum Ship ship_type = cell->ship_types[p];
-            int* ship_hits = &shm->players[p].ship_hits[ship_type];
-            *ship_hits += 1;
-            shm->players[shm->current_player_index].score += HIT_SCORE;
+            enum Ship ship_type = cell->ship_types[i];
+            Player* victim = &shm->players[i];
+
+            // Update Stats
+            victim->ship_hits[ship_type] += 1;
+            victim->total_hits += 1;
+            attacker->score += HIT_SCORE;
+
+            // Set Result
             shm->hit_result.type = HIT;
-            shm->hit_result.victim_index = p;
-
+            shm->hit_result.victim_index = i;
             hit_detected = true;
-            char* victim_name = shm->players[p].name;
 
-            // The ship got hit in all places
-            if (*ship_hits == get_ship_size(ship_type)) {
-                shm->players[p].is_sunk[ship_type] = true;
-                shm->players[shm->current_player_index].score += SUNK_SCORE;
-                shm->hit_result.type = SINK;
-
-                log_event(shm, "RESULT: SINK! %s sunk %s's ship!", attacker_name, victim_name);
+            // Check if specific ship is sunk (for Logging)
+            if (victim->ship_hits[ship_type] == get_ship_size(ship_type)) {
+                 // Victim Ship Sunk Logic
+                 victim->is_sunk[ship_type] = true;
+                 attacker->score += SUNK_SCORE;
+                 shm->hit_result.type = SINK;
+                 log_event(shm, "RESULT: SINK! %s sunk %s's ship!", attacker->name, victim->name);
             } else {
-                log_event(shm, "RESULT: HIT! %s hit %s's ship!", attacker_name, victim_name);
+                 log_event(shm, "RESULT: HIT! %s hit %s's ship!", attacker->name, victim->name);
+            }
+
+            // Game ends if one player has nothing left
+            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
+                shm->is_game_over = true;
+                log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
             }
         }
 
         if (!hit_detected) {
-            log_event(shm, "RESULT: MISS! %s missed at (%d, %d).", attacker_name, pos.x, pos.y);
+            log_event(shm, "RESULT: MISS! %s missed at (%d, %d).", attacker->name, pos.x, pos.y);
         }
 
         // Log the board state after the move
         log_battlefield(shm, battlefield);
 
-        i++;
-        if (i == 3) {
-            printf("Game finished\n");
+        kk++;
+
+        if (kk == 3 && LOSE_EARLY) {
+            printf("Game finished (LOSE_EARLY)\n");
             shm->is_game_over = true;
             log_event(shm, "GAME OVER: Turn limit reached.");
         }
 
-        sem_post(&shm->complete_game_update);
+        // Notify all child processes
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_post(&shm->game_update);
+        }
     }
 }

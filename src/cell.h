@@ -8,8 +8,8 @@
 
 typedef struct {
     Vector2D coordinates;
-    enum Ship ship_types[PLAYER_NUM];  // Ship type for each player (indexed by player)
-    bool has_ship[PLAYER_NUM];  // Whether each player has a ship on this cell
+    enum Ship ship_types[MAX_PLAYER_NUM];  // Ship type for each player (indexed by player)
+    bool has_ship[MAX_PLAYER_NUM];  // Whether each player has a ship on this cell
     bool is_shot;
 } Cell;
 
