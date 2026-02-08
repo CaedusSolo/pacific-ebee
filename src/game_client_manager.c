@@ -11,13 +11,20 @@
 
 void handle_game_start(GameClientData* game_data) {
     // Get battlefield
-    listen_for_message(game_data->fd, game_data->ships_board);
+    listen_for_message(game_data->fd, game_data->game_board);
     printf("Battlefield acquired!\n");
 
     char player_count_buffer[4];
     listen_for_message(game_data->fd, player_count_buffer);
     int player_count = int_deserialize(player_count_buffer);
     game_data->player_count = player_count;
+    printf("Player count acquired!\n");
+
+    char our_index_buffer[4];
+    listen_for_message(game_data->fd, our_index_buffer);
+    int our_index = int_deserialize(our_index_buffer);
+    game_data->our_index = our_index;
+    printf("Our index acquired!\n");
 
     char player_names_buffer[256*game_data->player_count];
     listen_for_message(game_data->fd, player_names_buffer);
@@ -32,7 +39,7 @@ void handle_game_start(GameClientData* game_data) {
     game_data->battlefield_size = battlefield_size;
     printf("Battlefield size acquired: %d\n", game_data->battlefield_size);
 
-    grid(game_data->battlefield_size, game_data->ships_board);
+    grid(game_data->battlefield_size, game_data->game_board);
 }
 
 void handle_turn(GameClientData* game_data) {
