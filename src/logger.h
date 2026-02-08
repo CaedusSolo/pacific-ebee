@@ -1,5 +1,5 @@
-#ifndef LOGGER.H
-#define LOGGER.H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include "shared_memory.h"
 
