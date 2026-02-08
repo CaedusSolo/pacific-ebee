@@ -22,5 +22,7 @@ typedef struct HitResult {
 
 void int_serialize(char* buffer, int value);
 int int_deserialize(const char* buffer);
+int hitresult_serialize(const HitResult* hr, char* buffer);
+int hitresult_deserialize(HitResult* hr, const char* buffer);
 
 #endif // !MESSAGES_H
