@@ -26,7 +26,7 @@ typedef struct ThreadArgs {
 
 // replicate renderer but for log
 void log_battlefield(SharedMemory* shm, Battlefield* bf) {
-    log_event(shm, "--- BATTLEFIELD STATE ---");
+    log_event(shm, "-------------------------------BATTLEFIELD STATE------------------------------- ");
 
     // Header Row (A B C ...)
     char header[512];
@@ -69,7 +69,7 @@ void log_battlefield(SharedMemory* shm, Battlefield* bf) {
         }
         log_event(shm, row_str);
     }
-    log_event(shm, "-------------------------");
+    log_event(shm, "----------------------------------------------------------------------");
 }
 
 void* game_update_thread(void *arg) {
