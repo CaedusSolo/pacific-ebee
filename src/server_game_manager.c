@@ -17,8 +17,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#define LOSE_EARLY 1
-
 
 typedef struct ThreadArgs {
     SharedMemory* shm;
@@ -205,12 +203,27 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
+        printf("[Child %d] Done turn\n", player_index);
         sem_post(&shm->complete_turn_sem);
     }
 
     close(player.fd);
     pthread_join(updater_thread, NULL);
     printf("[Child %d] Exiting.\n", player_index);
+}
+
+void update_score_infos(SharedMemory *shm) {
+    for (int i = 0; i < shm->player_num; i++) {
+        ScoreInfo* score_info = &shm->score_infos[i];
+        for (int j = 0; j < shm->player_num; i++) {
+            Player* player = &shm->players[i];
+            if (!strcmp(score_info->name, player->name)) {
+                if (player->score > score_info->highscore)
+                    score_info->highscore = player->score;
+                score_info->previous_score = player->score;
+            }
+        }
+    }
 }
 
 void game_loop(SharedMemory *shm, Battlefield* battlefield) {
@@ -273,20 +286,10 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->hit_result.victim_index = i;
             hit_detected = true;
 
-            // Check if specific ship is sunk (for Logging)
-            if (victim->ship_hits[ship_type] == get_ship_size(ship_type)) {
-                 // Victim Ship Sunk Logic
-                 victim->is_sunk[ship_type] = true;
-                 attacker->score += SUNK_SCORE;
-                 shm->hit_result.type = SINK;
-                 log_event(shm, "RESULT: SINK! %s sunk %s's ship!", attacker->name, victim->name);
-            } else {
-                 log_event(shm, "RESULT: HIT! %s hit %s's ship!", attacker->name, victim->name);
-            }
-
-            // Game ends if one player has nothing left
+            // Game ends if one player have nothing left
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
+                update_score_infos(shm);
                 log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
             }
         }
@@ -297,14 +300,6 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         // Log the board state after the move
         log_battlefield(shm, battlefield);
-
-        kk++;
-
-        if (kk == 3 && LOSE_EARLY) {
-            printf("Game finished (LOSE_EARLY)\n");
-            shm->is_game_over = true;
-            log_event(shm, "GAME OVER: Turn limit reached.");
-        }
 
         // Notify all child processes
         for (int i = 0; i < shm->player_num; i++) {

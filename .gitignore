@@ -19,5 +19,8 @@
 log.txt
 *.log
 
+# score file
+scores.txt
+
 bin/
 build/

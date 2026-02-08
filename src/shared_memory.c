@@ -1,5 +1,6 @@
 #include "shared_memory.h"
 #include "constants.h"
+#include "player.h"
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,9 @@ SharedMemory* shared_memory_init(int num_players) {
     shm->player_num = num_players;
     shm->game_running = false;
     shm->current_player_index = 0;
+
+    memset(shm->score_infos, 0, num_players * sizeof(ScoreInfo));
+    memset(shm->players, 0, num_players * sizeof(Player));
 
     // 2. Initialize Process-Shared Attributes
     pthread_mutexattr_t mattr;
