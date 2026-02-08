@@ -26,7 +26,7 @@ typedef struct ThreadArgs {
 
 // replicate renderer but for log
 void log_battlefield(SharedMemory* shm, Battlefield* bf) {
-    log_event(shm, "--- BATTLEFIELD STATE ---");
+    log_event(shm, "-------------------------------BATTLEFIELD STATE------------------------------- ");
 
     // Header Row (A B C ...)
     char header[512];
@@ -69,7 +69,7 @@ void log_battlefield(SharedMemory* shm, Battlefield* bf) {
         }
         log_event(shm, row_str);
     }
-    log_event(shm, "-------------------------");
+    log_event(shm, "----------------------------------------------------------------------");
 }
 
 void* game_update_thread(void *arg) {
@@ -126,7 +126,12 @@ void send_init_data(Player player, int player_index, SharedMemory* shm) {
 
 void handle_player(Player player, int player_index, SharedMemory* shm) {
     PlayerName name;
-    listen_for_message(player.fd, name);
+    int len = listen_for_message(player.fd, name);
+    if (len < sizeof(PlayerName)) {
+            name[len] = '\0';
+        } else {
+            name[sizeof(PlayerName) - 1] = '\0'; // Safety cap if message was too long
+        }
     strcpy(player.name, name);
     strcpy(shm->players[player_index].name, name);
 
@@ -157,6 +162,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     while (1) {
         // --- WAIT FOR TURN ---
         sem_wait(&shm->turn_sem[player_index]);
+        log_event(shm, "TURN: %s", shm->players[shm->current_player_index].name);
 
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
@@ -291,16 +297,59 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->hit_result.victim_index = i;
             hit_detected = true;
 
+            // Check if specific ship is sunk (Logic restored to support SINK scoring)
+            if (victim->ship_hits[ship_type] == get_ship_size(ship_type)) {
+                 victim->is_sunk[ship_type] = true;
+                 attacker->score += SUNK_SCORE; // Bonus points for sinking
+
+                 // Log SINK with Score
+                 log_event(shm, "RESULT: SINK! %s sunk %s's ship! (Score: %d)",
+                           attacker->name, victim->name, attacker->score);
+            } else {
+                 // Log HIT with Score
+                 log_event(shm, "RESULT: HIT! %s hit %s's ship! (Score: %d)",
+                           attacker->name, victim->name, attacker->score);
+            }
+
             // Game ends if one player have nothing left
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
                 update_score_infos(shm);
                 log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
+                int max_score = -1;
+                for (int k = 0; k < shm->player_num; k++) {
+                    if (shm->players[k].score > max_score) {
+                        max_score = shm->players[k].score;
+                    }
+                }
+
+                // 2. Identify all players with the maximum score
+                char winners_str[1024] = ""; // Large buffer to hold multiple names
+                int winner_count = 0;
+
+                for (int k = 0; k < shm->player_num; k++) {
+                    if (shm->players[k].score == max_score) {
+                        if (winner_count > 0) {
+                            strcat(winners_str, " & ");
+                        }
+                        strcat(winners_str, shm->players[k].name);
+                        winner_count++;
+                    }
+                }
+
+                // 3. Log appropriate message
+                if (winner_count > 1) {
+                    log_event(shm, "RESULT: IT'S A TIE! Winners: %s (Score: %d)", winners_str, max_score);
+                } else {
+                    log_event(shm, "RESULT: WINNER! %s (Score: %d)", winners_str, max_score);
+                }
             }
         }
 
         if (!hit_detected) {
-            log_event(shm, "RESULT: MISS! %s missed at (%d, %d).", attacker->name, pos.x, pos.y);
+            // Log MISS with Score
+            log_event(shm, "RESULT: MISS! %s missed at (%d, %d). (Score: %d)",
+                      attacker->name, pos.x, pos.y, attacker->score);
         }
 
         // Log the board state after the move
