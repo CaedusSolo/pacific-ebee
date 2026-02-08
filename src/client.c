@@ -57,6 +57,7 @@ int main (int argc, char *argv[]) {
             handle_game_update(&game_data);
         }
         else if (!strcmp(buffer, GAME_OVER)) {
+            handle_game_over(&game_data);
             break;
         }
 

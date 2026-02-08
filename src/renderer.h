@@ -25,8 +25,6 @@
 
 #define BF_OUR_SHIP 'S'
 #define BF_OUR_SHIP_ATTACKED 'a'
-#define BF_OUR_SHIP_SUNK 'b'
-#define BF_OTHER_SHIP_SUNK 's'
 #define BF_OUR_ATTACK 'X'
 #define BF_OTHER_ATTACK 'x'
 #define BF_EMPTY ' '
