@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#define LOSE_EARLY 1
+
 
 typedef struct ThreadArgs {
     SharedMemory* shm;
@@ -156,6 +158,8 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->done_ships_array);
     }
 
+    int kk = 0;
+
     while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
@@ -201,6 +205,12 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
             }
+        }
+
+        kk++;
+
+        if (kk == 3 && LOSE_EARLY) {
+            shm->is_game_over = true;
         }
 
         // Notify all child processes
