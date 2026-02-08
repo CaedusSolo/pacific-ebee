@@ -26,12 +26,9 @@ void handle_game_start(GameClientData* game_data);
 void handle_turn(GameClientData* game_data);
 void handle_game_update(GameClientData* game_data);
 int coord_to_index(Vector2D vector2d, int width);
-// void listenForNewBattlefield();
-//
-// Vector2D askShotCoords();
-// HitResult sendShot(Vector2D coords);
-// HitResult listenForOpponentShot();
-static void processHitResult(const HitResult* result, bool isOpponent);
+
+void client_wait_for_hit_result(GameClientData* game_data);
+void game_client_data_set_board_char(GameClientData* self, Vector2D pos, char val);
 //
 // GameStatus listenForGameStatus();
 //
