@@ -16,9 +16,9 @@ typedef struct GameClientData {
     int fd;
     int battlefield_size;
     int player_count;
+    int our_index;
     PlayerName player_names[MAX_PLAYER_NUM];
-    char ships_board[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
-    char attacks_board[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
+    char game_board[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
 } GameClientData;
 
 GameClientData game_client_manager_create(int fd);
