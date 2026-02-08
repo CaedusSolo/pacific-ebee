@@ -13,7 +13,7 @@ void *logger_thread(void *arg) {
         return NULL;
     }
 
-    fprintf(lf, "----SERVER STARTED----\n");
+    fprintf(lf, "--------------------------------SERVER STARTED--------------------------------\n");
     fflush(lf);
 
     while (1) {
