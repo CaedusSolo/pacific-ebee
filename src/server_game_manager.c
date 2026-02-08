@@ -78,7 +78,7 @@ void* game_update_thread(void *arg) {
     int our_index = thr_args->our_index;
     int fd = thr_args->fd;
 
-    char msg[272];
+    char msg[500];
     // Might be a synchronization problem later
     while (1) {
         sem_wait(&shm->game_update);
@@ -257,7 +257,10 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         Vector2D pos = shm->shoot_position;
         Cell* cell = battlefield_get_cell(battlefield, pos.x, pos.y);
 
-        if (cell) cell->is_shot = true;
+        if (cell) {
+            cell->is_shot = true;
+            cell->attacker_index = shm->current_player_index;
+        }
 
         shm->hit_result.position = pos;
         shm->hit_result.type = MISS;
