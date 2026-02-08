@@ -154,6 +154,20 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     printf("[Child %d] Exiting.\n", player_index);
 }
 
+void update_score_infos(SharedMemory *shm) {
+    for (int i = 0; i < shm->player_num; i++) {
+        ScoreInfo* score_info = &shm->score_infos[i];
+        for (int j = 0; j < shm->player_num; i++) {
+            Player* player = &shm->players[i];
+            if (!strcmp(score_info->name, player->name)) {
+                if (player->score > score_info->highscore)
+                    score_info->highscore = player->score;
+                score_info->previous_score = player->score;
+            }
+        }
+    }
+}
+
 void game_loop(SharedMemory *shm, Battlefield* battlefield) {
     for (int i = 0; i < shm->player_num; i++) {
         battlefield_to_char_array(battlefield, i, shm->ships_array);
@@ -205,16 +219,13 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->hit_result.victim_index = i;
 
             // Game ends if one player have nothing left
-            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
+            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT || (kk == 3 && LOSE_EARLY)) {
                 shm->is_game_over = true;
+                update_score_infos(shm);
             }
         }
 
         kk++;
-
-        if (kk == 3 && LOSE_EARLY) {
-            shm->is_game_over = true;
-        }
 
         // Notify all child processes
         for (int i = 0; i < shm->player_num; i++) {
