@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#define LOSE_EARLY 1
+
 
 typedef struct ThreadArgs {
     SharedMemory* shm;
@@ -108,6 +110,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
             send_message(player.fd, GAME_OVER, strlen(GAME_OVER));
+            char score_buffer[4];
+            int_serialize(score_buffer, shm->players[player_index].score);
+            send_message(player.fd, score_buffer, 4);
             break;
         }
 
@@ -156,8 +161,9 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->done_ships_array);
     }
 
-    int i = 0;
-    while (i < 3) {
+    int kk = 0;
+
+    while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
 
@@ -166,10 +172,12 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         sem_wait(&shm->client_shot);
 
+        Player* attacker = &shm->players[shm->current_player_index];
+
         // Update the battlefield
         printf("Player %d (%s) shot at (%d,%d)\n",
                shm->current_player_index,
-               shm->players[shm->current_player_index].name,
+               attacker->name,
                shm->shoot_position.x,
                shm->shoot_position.y
         );
@@ -188,21 +196,23 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
                 continue;
 
             enum Ship ship_type = cell->ship_types[i];
-            int* ship_hits = &shm->players[i].ship_hits[ship_type];
-            *ship_hits += 1;
-            shm->players[shm->current_player_index].score += HIT_SCORE;
+            Player* victim = &shm->players[i];
+            victim->ship_hits[ship_type] += 1;
+            victim->total_hits += 1;
+
+            attacker->score += HIT_SCORE;
             shm->hit_result.type = HIT;
             shm->hit_result.victim_index = i;
 
-            // The ship got hit in all places
-            if (*ship_hits == get_ship_size(ship_type)) {
-                shm->players[i].is_sunk[ship_type] = true;
-                shm->players[shm->current_player_index].score += SUNK_SCORE;
-                shm->hit_result.type = SINK;
+            // Game ends if one player have nothing left
+            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
+                shm->is_game_over = true;
             }
         }
 
-        if (i == 2) {
+        kk++;
+
+        if (kk == 3 && LOSE_EARLY) {
             shm->is_game_over = true;
         }
 
@@ -210,7 +220,5 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         for (int i = 0; i < shm->player_num; i++) {
             sem_post(&shm->game_update);
         }
-
-        i++;
     }
 }
