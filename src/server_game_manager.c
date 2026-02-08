@@ -132,7 +132,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     // Log Connection
     log_event(shm, "CONNECTION: Player %d connected as '%s'", player_index, name);
 
-    memset(player.ship_hits, 0, ALL_SHIPS_COUNT);
+    memset(player.ship_hits, 0, ALL_SHIPS_COUNT * sizeof(int));
 
     printf("[Child %d] Connected. Waiting for other players...\n", player_index);
 
@@ -183,7 +183,6 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         sem_post(&shm->turn_notified_sem);
 
         // Wait for client input shooting position (Blocking read)
-        size_t len;
         char input[8];
         listen_for_message(player.fd, input);
         shm->shoot_position = vector2d_deserialize(input);
@@ -235,8 +234,6 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
     log_event(shm, "GAME START: All players ready.");
     log_battlefield(shm, battlefield);
-
-    int kk = 0;
 
     while (1) {
         // Wait for turn change to finish
