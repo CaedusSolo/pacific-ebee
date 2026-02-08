@@ -3,6 +3,14 @@
 
 #include "cell.h"
 
+#define BF_OUR_SHIP 'S'
+#define BF_OUR_SHIP_ATTACKED 'a'
+#define BF_OUR_ATTACK 'X'
+#define BF_OTHER_ATTACK 'o'
+#define BF_OTHER_SHIP_ATTACKED 'c'
+#define BF_EMPTY ' '
+
+
 typedef struct {
     int width;
     int height;
@@ -17,7 +25,5 @@ int battlefield_get_height(const Battlefield* self);
 void battlefield_update_cell(Battlefield* self, int x, int y, Cell cell);
 void battlefield_place_ships_randomly(Battlefield* self, int player_index);
 void battlefield_to_char_array(const Battlefield* self, int player_index, char* char_array);
-// int battlefield_serialize(const Battlefield* bf, char* buffer);
-// int battlefield_deserialize(Battlefield* bf, const char* buffer);
 
 #endif
