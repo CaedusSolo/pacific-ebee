@@ -125,7 +125,12 @@ void send_init_data(Player player, int player_index, SharedMemory* shm) {
 
 void handle_player(Player player, int player_index, SharedMemory* shm) {
     PlayerName name;
-    listen_for_message(player.fd, name);
+    int len = listen_for_message(player.fd, name);
+    if (len < sizeof(PlayerName)) {
+            name[len] = '\0';
+        } else {
+            name[sizeof(PlayerName) - 1] = '\0'; // Safety cap if message was too long
+        }
     strcpy(player.name, name);
     strcpy(shm->players[player_index].name, name);
 
