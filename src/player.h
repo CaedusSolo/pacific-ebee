@@ -13,6 +13,7 @@ typedef struct Player {
     // Socket file descriptor
     int fd;
     int score;
+    int total_hits;
 
     // Number of hits each of our ships have gotten
     int ship_hits[ALL_SHIPS_COUNT];

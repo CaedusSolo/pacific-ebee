@@ -3,6 +3,7 @@
 
 
 #define ALL_SHIPS_COUNT 5
+#define ALL_SHIPS_COORDS_COUNT 17
 
 enum Ship {
     CARRIER,
