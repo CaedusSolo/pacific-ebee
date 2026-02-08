@@ -1,8 +1,11 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define BATTLEFIELD_SIZE 25
+#define BATTLEFIELD_SIZE 10
+#define MAX_BATTLEFIELD_SIZE 25
 #define PLAYER_NUM 3
 #define MAX_LOG_LENGTH 256
+#define HIT_SCORE 10
+#define SUNK_SCORE 20
 
 #endif  // CONSTANTS_H

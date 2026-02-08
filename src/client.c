@@ -1,6 +1,7 @@
 #include "connection.h"
+#include "constants.h"
+#include "game_client_manager.h"
 #include "messages.h"
-#include "vector2d.h"
 #include <stddef.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -28,42 +29,35 @@ int main (int argc, char *argv[]) {
 
     // Print banner
 
+    // Send player's name
     send_message(fd, argv[1], strlen(argv[1]));
 
+    GameClientData game_data = {
+        .fd = fd,
+    };
+    memset(game_data.ships_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+    memset(game_data.attacks_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+
     char buffer[100];
+    memset(buffer, 0, 100);
     size_t msg_len;
 
     while(1) {
         msg_len = listen_for_message(fd, buffer);
         if (buffer[msg_len] != '\0')
             buffer[msg_len + 1] = '\0';
+        printf("%s\n", buffer);
 
-
-        if (!strcmp(buffer, "GAME_START")) {
-            printf("%s\n", buffer);
+        if (!strcmp(buffer, GAME_START)) {
+            handle_game_start(&game_data);
         }
         else if (!strcmp(buffer, YOUR_TURN)) {
-            printf("%s\n", buffer);
-            send_message(fd, READY_FOR_TURN, 15);
-            int x, y;
-            printf("Enter coords: ");
-            scanf("%d %d", &x, &y);
-            Vector2D pos = vector2d_create(x, y);
-
-            char pos_buffer[8];
-            vector2d_serialize(&pos, pos_buffer);
-            send_message(fd, pos_buffer, 8);
+            handle_turn(&game_data);
         }
-        else if (!strcmp(buffer, "UPDATE")) {
-            printf("%s\n", buffer);
-            char update_msg[8];
-            size_t update_msg_len;
-            listen_for_message(fd, update_msg);
-            Vector2D ans = vector2d_deserialize(update_msg);
-            printf("Game update: (%d, %d)\n", ans.x, ans.y);
+        else if (!strcmp(buffer, GAME_UPDATE)) {
+            handle_game_update(&game_data);
         }
-        else if (!strcmp(buffer, "GAME_OVER")) {
-            printf("Game finished!\n");
+        else if (!strcmp(buffer, GAME_OVER)) {
             break;
         }
 
