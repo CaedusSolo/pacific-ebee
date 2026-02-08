@@ -165,10 +165,12 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         sem_wait(&shm->client_shot);
 
+        Player* attacker = &shm->players[shm->current_player_index];
+
         // Update the battlefield
         printf("Player %d (%s) shot at (%d,%d)\n",
                shm->current_player_index,
-               shm->players[shm->current_player_index].name,
+               attacker->name,
                shm->shoot_position.x,
                shm->shoot_position.y
         );
@@ -187,11 +189,18 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
                 continue;
 
             enum Ship ship_type = cell->ship_types[i];
-            int* ship_hits = &shm->players[i].ship_hits[ship_type];
-            *ship_hits += 1;
-            shm->players[shm->current_player_index].score += HIT_SCORE;
+            Player* victim = &shm->players[i];
+            victim->ship_hits[ship_type] += 1;
+            victim->total_hits += 1;
+
+            attacker->score += HIT_SCORE;
             shm->hit_result.type = HIT;
             shm->hit_result.victim_index = i;
+
+            // Game ends if one player have nothing left
+            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
+                shm->is_game_over = true;
+            }
         }
 
         // Notify all child processes

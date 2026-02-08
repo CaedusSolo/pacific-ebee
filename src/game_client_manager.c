@@ -90,9 +90,9 @@ void client_wait_for_hit_result(GameClientData* game_data) {
     switch (hr.type) {
         case MISS:
         new_value = BF_OTHER_ATTACK;
-        printf("%s missed!\n", attacker_name);
         game_client_data_set_board_char(game_data, hr.position, new_value);
         grid(game_data->battlefield_size, game_data->game_board);
+        printf("%s missed!\n", attacker_name);
         break;
 
         case HIT:
