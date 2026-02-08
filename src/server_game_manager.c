@@ -175,7 +175,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         sem_wait(&shm->notify_turn_sem);
         send_message(player.fd, YOUR_TURN, strlen(YOUR_TURN));
 
-        char resp[20];
+        char resp[100];
         // do {
         listen_for_message(player.fd, resp);
         // } while(strcmp(resp, READY_FOR_TURN) != 0);
@@ -214,8 +214,8 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 void update_score_infos(SharedMemory *shm) {
     for (int i = 0; i < shm->player_num; i++) {
         ScoreInfo* score_info = &shm->score_infos[i];
-        for (int j = 0; j < shm->player_num; i++) {
-            Player* player = &shm->players[i];
+        for (int j = 0; j < shm->player_num; j++) {
+            Player* player = &shm->players[j];
             if (!strcmp(score_info->name, player->name)) {
                 if (player->score > score_info->highscore)
                     score_info->highscore = player->score;

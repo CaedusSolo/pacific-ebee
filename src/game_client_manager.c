@@ -55,10 +55,16 @@ int letter_to_number(char c) {
 void handle_turn(GameClientData* game_data) {
     int fd = game_data->fd;
 
-    send_message(fd, READY_FOR_TURN, 15);
+    send_message(fd, READY_FOR_TURN, sizeof(READY_FOR_TURN));
     int y, x; char x_char;
     printf("Enter coords: ");
+
     scanf("%c %d", &x_char, &y);
+    char c;
+    // Clean standard input
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf("Read: %c %d\n", x_char, y);
+
     x = letter_to_number(x_char);
     // Minus 1 to turn into indices
     Vector2D pos = vector2d_create(x - 1, y - 1);
@@ -71,7 +77,6 @@ void handle_turn(GameClientData* game_data) {
 
 void handle_game_update(GameClientData* game_data) {
     client_wait_for_hit_result(game_data);
-    grid(game_data->battlefield_size, game_data->game_board);
 }
 
 void handle_game_over(GameClientData* game_data) {
