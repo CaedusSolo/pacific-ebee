@@ -219,10 +219,15 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->hit_result.victim_index = i;
 
             // Game ends if one player have nothing left
-            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT || (kk == 3 && LOSE_EARLY)) {
+            if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
                 update_score_infos(shm);
             }
+        }
+
+        if (kk == 3 && LOSE_EARLY) {
+            shm->is_game_over = true;
+            update_score_infos(shm);
         }
 
         kk++;
