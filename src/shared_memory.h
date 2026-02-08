@@ -20,6 +20,7 @@ typedef struct {
     bool game_running;
     bool is_game_over;
     int current_player_index;
+    int battlefield_size;
 
     // Messaging between main process and child processes
     Vector2D shoot_position;
@@ -46,12 +47,12 @@ typedef struct {
 
     pthread_barrier_t game_start_barrier;
 
-    sem_t turn_sem[PLAYER_NUM];
-    sem_t get_ships_array[PLAYER_NUM];
+    sem_t turn_sem[MAX_PLAYER_NUM];
+    sem_t get_ships_array[MAX_PLAYER_NUM];
 
-    Player players[PLAYER_NUM];
+    Player players[MAX_PLAYER_NUM];
 
-    char ships_array[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
+    char ships_array[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
 } SharedMemory;
 
 SharedMemory* shared_memory_init(int num_players);
