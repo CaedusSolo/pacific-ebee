@@ -6,6 +6,9 @@
 
 #define YOUR_TURN "YOUR_TURN"
 #define READY_FOR_TURN "READY_FOR_TURN"
+#define GAME_START "GAME_START"
+#define GAME_UPDATE "GAME_UPDATE"
+#define GAME_OVER "GAME_OVER"
 
 typedef struct HitResult {
     enum Type {
@@ -15,6 +18,14 @@ typedef struct HitResult {
     } type;
     Vector2D position;
     enum Ship ship_sunk; // Valid only if type is SINK
+    int attacker_index;
+    int victim_index;
 } HitResult;
+
+void int_serialize(char* buffer, int value);
+int int_deserialize(const char* buffer);
+int hitresult_serialize(const HitResult* hr, char* buffer);
+int hitresult_deserialize(HitResult* hr, const char* buffer);
+void hitresult_print(const HitResult* hr);
 
 #endif // !MESSAGES_H

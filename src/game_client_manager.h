@@ -12,23 +12,20 @@
 
 
 
-typedef struct GameClientManager {
-    Battlefield* battlefield;
+typedef struct GameClientData {
     int fd;
+    int player_index;
+    PlayerName player_names[PLAYER_NUM];
+    char ships_board[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
+    char attacks_board[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
+} GameClientData;
 
-
-} GameClientManager;
-
-GameClientManager game_client_manager_create(int fd);
-void game_loop(GameClientManager* game_client_manager);
-static void waitForGameReady();
-static void sendReadySignal();
-
-static char* askPlayerName();
-static void sendPlayerName(const PlayerName name);
-//
+GameClientData game_client_manager_create(int fd);
+void handle_game_start(GameClientData* game_data);
+void handle_turn(GameClientData* game_data);
+void handle_game_update(GameClientData* game_data);
+int coord_to_index(Vector2D vector2d, int width);
 // void listenForNewBattlefield();
-// bool listenForFirstTurnDecision();
 //
 // Vector2D askShotCoords();
 // HitResult sendShot(Vector2D coords);

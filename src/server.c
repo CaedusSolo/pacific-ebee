@@ -1,4 +1,5 @@
-#include "connection.h"
+#include "battlefield.h"
+#include "constants.h"
 #include "player.h"
 #include "server_connection.h"
 #include "server_game_manager.h"
@@ -83,22 +84,24 @@ int main(int argc, char *argv[]) {
     int port = 8999;
     int num_players = 3;
 
-    // 1. Initialize Shared Memory
+    // Initialize Shared Memory
     global_shm = shared_memory_init(num_players);
     if (!global_shm) {
         fprintf(stderr, "Failed to initialize shared memory.\n");
         return 1;
     }
 
-    // 2. Start Internal Threads (Parent)
+    // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
     // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
 
-    // 3. Network Setup
+    Battlefield battlefield = battlefield_new(BATTLEFIELD_SIZE, BATTLEFIELD_SIZE);
+
+    // Network Setup
     int listening_fd = server_connection_start(port);
     printf("[Server] Waiting for %d players on port %d...\n", num_players, port);
 
-    // 4. Accept & Fork Loop
+    // Accept & Fork Loop
     for (int i = 0; i < num_players; i++) {
         int client_fd = server_connection_accept_player(listening_fd);
 
@@ -108,7 +111,10 @@ int main(int argc, char *argv[]) {
         }
 
         // Mark connected in shared memory
-        global_shm->player_connected[i] = true;
+        global_shm->players[i].connected = true;
+
+        // Generate ship placement on battlesfield
+        battlefield_place_ships_randomly(&battlefield, i);
 
         pid_t pid = fork();
 
@@ -119,13 +125,7 @@ int main(int argc, char *argv[]) {
         else if (pid == 0) {
             close(listening_fd);
             Player current_player;
-            memset(&current_player, 0, sizeof(Player));
             current_player.fd = client_fd;
-
-            PlayerName name;
-            listen_for_message(client_fd, name);
-            strcpy(current_player.name, name);
-            strcpy(global_shm->player_names[i], name);
 
             handle_player(current_player, i, global_shm);
             // pass semaphore details to child process
@@ -133,9 +133,9 @@ int main(int argc, char *argv[]) {
         }
         else {
             // --- PARENT PROCESS ---
-            close(client_fd);
+            // close(client_fd);
 
-            global_shm->player_pids[i] = pid;
+            global_shm->players[i].pid = pid;
             printf("[Server] Player %d connected (PID: %d)\n", i, pid);
         }
     }
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     global_shm->game_running = true;
     printf("[Server] All players connected. Game Starting.\n");
     pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
-    game_loop(global_shm);
+    game_loop(global_shm, &battlefield);
 
     // pthread_join(log_tid, NULL);
     pthread_join(sched_tid, NULL);

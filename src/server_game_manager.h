@@ -5,6 +5,7 @@
 #include "player.h"
 #include "constants.h"
 #include "shared_memory.h"
+#include "battlefield.h"
 
 
 typedef struct Shot{
@@ -23,7 +24,7 @@ typedef struct ServerGameManager{
 ServerGameManager server_game_manager_create(int num_players, int listening_fd);
 void server_game_manager_destroy(ServerGameManager* self);
 void start_game(ServerGameManager* self);
-void game_loop(SharedMemory *shm);
+void game_loop(SharedMemory *shm, Battlefield* battlefield);
 void handle_player(Player player, int player_index, SharedMemory *shm);
 void check_player_hit(ServerGameManager* self);
 

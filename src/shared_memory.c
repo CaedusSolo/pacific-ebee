@@ -1,4 +1,6 @@
 #include "shared_memory.h"
+#include "constants.h"
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -45,9 +47,11 @@ SharedMemory* shared_memory_init(int num_players) {
     sem_init(&shm->game_update, 1, 0);
     sem_init(&shm->complete_game_update, 1, 0);
     sem_init(&shm->game_loop, 1, 0);
+    sem_init(&shm->done_ships_array, 1, 0);
 
     for (int i = 0; i < PLAYER_NUM; i++) {
         sem_init(&shm->turn_sem[i], 1, 0);
+        sem_init(&shm->get_ships_array[i], 1, 0);
     }
 
     pthread_barrier_init(&shm->game_start_barrier, &battr, num_players);
