@@ -13,6 +13,7 @@
 
 #define ANSI_BG_BLUE "\033[44m"
 #define ANSI_BG_GREY "\033[100m"
+#define ANSI_BG_RED "\033[41m"
 
 #define ANSI_RESET "\033[0m"
 #define ANSI_SLOW_BLINK "\033[5m"
@@ -22,8 +23,16 @@
 #define ANSI_NORMAL_WEIGHT "\033[22m"
 #define ANSI_RESET_ALL "\033[0m"
 
+#define BF_OUR_SHIP 'S'
+#define BF_OUR_SHIP_ATTACKED 'a'
+#define BF_OUR_SHIP_SUNK 'b'
+#define BF_OTHER_SHIP_SUNK 's'
+#define BF_OUR_ATTACK 'X'
+#define BF_OTHER_ATTACK 'x'
+#define BF_EMPTY ' '
+
 // player count, battlefield size, player (own) grid?
-void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard);
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE]);
 
 
 #endif

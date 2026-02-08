@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "game_states.h"
 #include "messages.h"
+#include "player.h"
 #include "shared_memory.h"
 #include "vector2d.h"
 #include <bits/pthreadtypes.h>
@@ -32,14 +33,45 @@ void* game_update_thread(void *arg) {
     // Might be a synchronization problem later
     while (1) {
         sem_wait(&shm->game_update);
-        if (shm->current_player_index == our_index)
-            continue;
-        send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
+        if (shm->current_player_index != our_index)
+            send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
         int msg_len = hitresult_serialize(&shm->hit_result, msg);
         send_message(fd, msg, msg_len);
+        sem_post(&shm->complete_game_update);
     }
 
     return NULL;
+}
+
+void send_init_data(Player player, int player_index, SharedMemory* shm) {
+    // Send ship arrays
+    // Get the main process to generate the array
+    sem_wait(&shm->get_ships_array[player_index]);
+    size_t ships_array_len = shm->battlefield_size * shm->battlefield_size;
+    send_message(player.fd, shm->ships_array, ships_array_len);
+    sem_post(&shm->done_ships_array);
+
+    // Send player count
+    char player_num_buffer[4];
+    int_serialize(player_num_buffer, shm->player_num);
+    send_message(player.fd, player_num_buffer, 4);
+
+    // Send player index
+    char their_index_buffer[4];
+    int_serialize(their_index_buffer, player_index);
+    send_message(player.fd, their_index_buffer, 4);
+
+    // Send all players name
+    char names_buffer[256 * shm->player_num];
+    for (int i = 0; i < shm->player_num; i++) {
+        memcpy(names_buffer + (i*256), shm->players[i].name, 256);
+    }
+    send_message(player.fd, names_buffer, 256*shm->player_num);
+
+    // Send the battlefield size
+    char battlefield_size_buffer[4];
+    int_serialize(battlefield_size_buffer, shm->battlefield_size);
+    send_message(player.fd, battlefield_size_buffer, 4);
 }
 
 void handle_player(Player player, int player_index, SharedMemory* shm) {
@@ -57,23 +89,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     printf("[Child %d] Game Started! Sending signal to client.\n", player_index);
     send_message(player.fd, GAME_START, strlen(GAME_START));
 
-    // Send ship arrays
-    // Get the main process to generate the array
-    sem_wait(&shm->get_ships_array[player_index]);
-    send_message(player.fd, shm->ships_array, BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
-    sem_post(&shm->done_ships_array);
-
-    // Send all players name
-    char names_buffer[256 * PLAYER_NUM];
-    for (int i = 0; i < PLAYER_NUM; i++) {
-        memcpy(names_buffer + (i*256), shm->players[i].name, 256);
-    }
-    send_message(player.fd, names_buffer, 256*PLAYER_NUM);
-
-    // Send the player index
-    char player_index_buffer[4];
-    int_serialize(player_index_buffer, player_index);
-    send_message(player.fd, player_index_buffer, 4);
+    send_init_data(player, player_index, shm);
 
     // Separate thread to send game update states
     ThreadArgs thr_args = {
@@ -119,7 +135,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         printf("[Child %d] Player shot!\n", player_index);
         sem_post(&shm->client_shot);
 
-        sem_wait(&shm->complete_game_update);
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_wait(&shm->complete_game_update);
+        }
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
@@ -132,7 +150,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 }
 
 void game_loop(SharedMemory *shm, Battlefield* battlefield) {
-    for (int i = 0; i < PLAYER_NUM; i++) {
+    for (int i = 0; i < shm->player_num; i++) {
         battlefield_to_char_array(battlefield, i, shm->ships_array);
         sem_post(&shm->get_ships_array[i]);
         sem_wait(&shm->done_ships_array);
@@ -147,10 +165,7 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->turn_notified_sem);
 
         sem_wait(&shm->client_shot);
-        // Notify all child processes
-        for (int i = 0; i < PLAYER_NUM-1; i++) {
-            sem_post(&shm->game_update);
-        }
+
         // Update the battlefield
         printf("Player %d (%s) shot at (%d,%d)\n",
                shm->current_player_index,
@@ -165,9 +180,10 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         shm->hit_result.position = pos;
         shm->hit_result.type = MISS;
+        shm->hit_result.attacker_index = shm->current_player_index;
 
         // Check who got shot
-        for (int i = 0; i < PLAYER_NUM; i++) {
+        for (int i = 0; i < shm->player_num; i++) {
             if (!cell->has_ship[i])
                 continue;
 
@@ -176,7 +192,6 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             *ship_hits += 1;
             shm->players[shm->current_player_index].score += HIT_SCORE;
             shm->hit_result.type = HIT;
-            shm->hit_result.attacker_index = shm->current_player_index;
             shm->hit_result.victim_index = i;
 
             // The ship got hit in all places
@@ -187,12 +202,15 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             }
         }
 
-        i++;
-        if (i == 3) {
-            printf("Game finished\n");
+        if (i == 2) {
             shm->is_game_over = true;
         }
 
-        sem_post(&shm->complete_game_update);
+        // Notify all child processes
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_post(&shm->game_update);
+        }
+
+        i++;
     }
 }
