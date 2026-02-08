@@ -90,6 +90,14 @@ static void place_ship(Battlefield* self, int x, int y, int size, bool horizonta
         if (cell) {
             cell->has_ship[player_index] = true;
             cell->ship_types[player_index] = ship_type;
+
+            // For testing
+            #ifdef LOSE_EARLY
+            if (player_index == 0 && i != 0) {
+                cell->is_shot = true;
+                cell->attacker_index = 1;
+            }
+            #endif
         }
     }
 }
@@ -141,7 +149,26 @@ void battlefield_to_char_array(const Battlefield* self, int player_index, char* 
     for (int y = 0; y < self->height; y++) {
         for (int x = 0; x < self->width; x++) {
             Cell* cell = &self->grid[y][x];
-            char_array[x + (y * self->width)] = cell->has_ship[player_index] ? 'S' : ' ';
+            char* c = &char_array[x + (y * self->width)];
+
+            if (cell->has_ship[player_index]) {
+                if (cell->is_shot)
+                    *c = BF_OUR_SHIP_ATTACKED;
+                else
+                    *c = BF_OUR_SHIP;
+            }
+            else if (cell_has_player_ship(cell, player_index) && cell->is_shot) {
+                *c = BF_OTHER_SHIP_ATTACKED;
+            }
+            else if (cell->is_shot) {
+                if (cell->attacker_index == player_index)
+                    *c = BF_OUR_ATTACK;
+                else
+                    *c = BF_OTHER_ATTACK;
+            }
+            else {
+                *c = BF_EMPTY;
+            }
         }
     }
 }

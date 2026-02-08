@@ -11,6 +11,7 @@ typedef struct {
     enum Ship ship_types[MAX_PLAYER_NUM];  // Ship type for each player (indexed by player)
     bool has_ship[MAX_PLAYER_NUM];  // Whether each player has a ship on this cell
     bool is_shot;
+    int attacker_index;
 } Cell;
 
 Cell* cell_new();
