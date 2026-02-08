@@ -291,6 +291,20 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->hit_result.victim_index = i;
             hit_detected = true;
 
+            // Check if specific ship is sunk (Logic restored to support SINK scoring)
+            if (victim->ship_hits[ship_type] == get_ship_size(ship_type)) {
+                 victim->is_sunk[ship_type] = true;
+                 attacker->score += SUNK_SCORE; // Bonus points for sinking
+
+                 // Log SINK with Score
+                 log_event(shm, "RESULT: SINK! %s sunk %s's ship! (Score: %d)",
+                           attacker->name, victim->name, attacker->score);
+            } else {
+                 // Log HIT with Score
+                 log_event(shm, "RESULT: HIT! %s hit %s's ship! (Score: %d)",
+                           attacker->name, victim->name, attacker->score);
+            }
+
             // Game ends if one player have nothing left
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
@@ -300,7 +314,9 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         }
 
         if (!hit_detected) {
-            log_event(shm, "RESULT: MISS! %s missed at (%d, %d).", attacker->name, pos.x, pos.y);
+            // Log MISS with Score
+            log_event(shm, "RESULT: MISS! %s missed at (%d, %d). (Score: %d)",
+                      attacker->name, pos.x, pos.y, attacker->score);
         }
 
         // Log the board state after the move
