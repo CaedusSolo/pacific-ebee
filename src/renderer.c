@@ -23,7 +23,7 @@ void displayBanner(void) {
 }
 
 
-void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE], bool isOurBoard){
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE]){
     if (size > MAX_BATTLEFIELD_SIZE) size = MAX_BATTLEFIELD_SIZE;
 
     printf("   ");
@@ -47,23 +47,22 @@ void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE
 
             char cell = battlefield[index];
 
-            if ((cell == 'S' && isOurBoard) || cell == 'X' || cell == 'O') {
-                printf("%s", ANSI_BG_BLUE); // colour the bg blue
-            } else {
-                printf("%s", ANSI_BG_GREY); // attacked area turns grey
-            }
-
-            if (cell == 'X') {
-                printf("%s%s X ", ANSI_RED, ANSI_BOLD);
-            }
-            else if (cell == 'O') {
-                printf(" O ");
-            }
-            else if (cell == 'S' && isOurBoard) {
-                printf(" S "); // placement of the ships
-            }
-            else {
-                printf(" . ");
+            switch (cell) {
+                case BF_OTHER_ATTACK:
+                    printf("%s%s X ", ANSI_RED, ANSI_BOLD);
+                	break;
+                case BF_OUR_ATTACK:
+                    printf("%s X ", ANSI_GREEN);
+                	break;
+                case BF_OUR_SHIP:
+                    printf("%s%s S ", ANSI_BG_BLUE, ANSI_BLUE);
+                	break;
+                case BF_OUR_SHIP_ATTACKED:
+                    printf("%s%s%s X ", ANSI_BG_BLUE, ANSI_RED, ANSI_BOLD);
+                case BF_OTHER_SUNK_SHIP:
+                    printf("%s%s O ", ANSI_BG_GREY, ANSI_BLUE);
+                default:
+                    printf(" . ");
             }
 
             printf("%s", ANSI_RESET_ALL);

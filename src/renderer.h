@@ -22,8 +22,15 @@
 #define ANSI_NORMAL_WEIGHT "\033[22m"
 #define ANSI_RESET_ALL "\033[0m"
 
+#define BF_OUR_SHIP 'S'
+#define BF_OUR_SHIP_ATTACKED 'a'
+#define BF_OTHER_SUNK_SHIP 's'
+#define BF_OUR_ATTACK 'X'
+#define BF_OTHER_ATTACK 'x'
+#define BF_EMPTY ' '
+
 // player count, battlefield size, player (own) grid?
-void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE], bool isOurBoard);
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE]);
 
 
 #endif
