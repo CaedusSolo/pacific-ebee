@@ -30,10 +30,5 @@ int coord_to_index(Vector2D vector2d, int width);
 
 void client_wait_for_hit_result(GameClientData* game_data);
 void game_client_data_set_board_char(GameClientData* self, Vector2D pos, char val);
-//
-// GameStatus listenForGameStatus();
-//
-static void endGame(bool isWinner);
-static int listenForFinalScore(int fd);
 
 #endif // !GAME_MANAGER_H
