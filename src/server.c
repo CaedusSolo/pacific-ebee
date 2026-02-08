@@ -1,5 +1,4 @@
 #include "battlefield.h"
-#include "constants.h"
 #include "player.h"
 #include "server_connection.h"
 #include "server_game_manager.h"
@@ -28,16 +27,6 @@
 // Global pointer for signal handlers
 SharedMemory* global_shm = NULL;
 FILE* score_file;
-
-void* logger_thread(void* arg) {
-    SharedMemory* shm = (SharedMemory*)arg;
-    while (1) {
-        sem_wait(&shm->log_count_sem);
-        // ... Log writing logic ...
-        // printf("Logger thread woke up\n");
-    }
-    return NULL;
-}
 
 void* scheduler_thread(void* arg) {
     SharedMemory* shm = (SharedMemory*)arg;
@@ -150,8 +139,7 @@ int main(int argc, char *argv[]) {
     // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
     pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
-    pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
-    
+
     Battlefield battlefield = battlefield_new(battlefield_size, battlefield_size);
 
     // Network Setup

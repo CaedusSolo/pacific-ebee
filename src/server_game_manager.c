@@ -17,8 +17,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#define LOSE_EARLY 1
-
 
 typedef struct ThreadArgs {
     SharedMemory* shm;
@@ -205,6 +203,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
+        printf("[Child %d] Done turn\n", player_index);
         sem_post(&shm->complete_turn_sem);
     }
 
@@ -290,7 +289,7 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             // Game ends if one player have nothing left
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
-                update_score_infos(shm); 
+                update_score_infos(shm);
                 log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
             }
         }
@@ -301,14 +300,6 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         // Log the board state after the move
         log_battlefield(shm, battlefield);
-
-        kk++;
-
-        if (kk == 3 && LOSE_EARLY) {
-            printf("Game finished (LOSE_EARLY)\n");
-            shm->is_game_over = true;
-            update_score_infos(shm);
-        }
 
         // Notify all child processes
         for (int i = 0; i < shm->player_num; i++) {
