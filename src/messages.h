@@ -24,5 +24,6 @@ void int_serialize(char* buffer, int value);
 int int_deserialize(const char* buffer);
 int hitresult_serialize(const HitResult* hr, char* buffer);
 int hitresult_deserialize(HitResult* hr, const char* buffer);
+void hitresult_print(const HitResult* hr);
 
 #endif // !MESSAGES_H
