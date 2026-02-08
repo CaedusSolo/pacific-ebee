@@ -1,7 +1,6 @@
 #include "messages.h"
 #include <netinet/in.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
 
 
@@ -37,10 +36,6 @@ int hitresult_serialize(const HitResult* hr, char* buffer) {
     *(uint32_t*)ptr = htonl(hr->position.y);
     ptr += 4;
 
-    // Ship sunk (4 bytes)
-    *(uint32_t*)ptr = htonl((uint32_t)hr->ship_sunk);
-    ptr += 4;
-
     *(uint32_t*)ptr = htonl((uint32_t)hr->attacker_index);
     ptr += 4;
 
@@ -65,9 +60,6 @@ int hitresult_deserialize(HitResult* hr, const char* buffer) {
     hr->position.y = ntohl(*(uint32_t*)ptr);
     ptr += 4;
 
-    hr->ship_sunk = (enum Ship)ntohl(*(uint32_t*)ptr);
-    ptr += 4;
-
     hr->attacker_index = ntohl(*(uint32_t*)ptr);
     ptr += 4;
 
@@ -84,17 +76,12 @@ void hitresult_print(const HitResult* hr) {
     switch (hr->type) {
         case MISS: type_str = "MISS"; break;
         case HIT:  type_str = "HIT"; break;
-        case SINK: type_str = "SINK"; break;
         default:   type_str = "UNKNOWN"; break;
     }
 
-    if (hr->type == SINK || hr->type == HIT) {
+    if (hr->type == HIT) {
         printf("Attacker: %d, Victim: %d\n", hr->attacker_index, hr->victim_index);
     }
 
     printf("Type: %s, Position: (%d, %d)\n", type_str, hr->position.x, hr->position.y);
-
-    if (hr->type == SINK) {
-        printf(", Ship Sunk: %d\n", hr->ship_sunk);
-    }
 }
