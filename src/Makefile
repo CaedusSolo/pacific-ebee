@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -std=c99 -D_XOPEN_SOURCE=700 -pthread
+CFLAGS = -g -std=c99 -D_XOPEN_SOURCE=700 -pthread -Wall
 LDFLAGS = -lrt -lm
 OBJDIR = obj
 BINDIR = bin
