@@ -62,6 +62,13 @@ void handle_game_update(GameClientData* game_data) {
     grid(game_data->battlefield_size, game_data->game_board);
 }
 
+void handle_game_over(GameClientData* game_data) {
+    char score_buffer[4];
+    listen_for_message(game_data->fd, score_buffer);
+    game_data->score = int_deserialize(score_buffer);
+    printf("Your score: %d\n", game_data->score);
+}
+
 int coord_to_index(Vector2D vector2d, int width) {
     return vector2d.x + (vector2d.y * width);
 }

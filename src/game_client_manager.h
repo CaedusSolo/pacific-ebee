@@ -11,12 +11,12 @@
 #include "player.h"
 
 
-
 typedef struct GameClientData {
     int fd;
     int battlefield_size;
     int player_count;
     int our_index;
+    int score;
     PlayerName player_names[MAX_PLAYER_NUM];
     char game_board[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
 } GameClientData;
@@ -25,6 +25,7 @@ GameClientData game_client_manager_create(int fd);
 void handle_game_start(GameClientData* game_data);
 void handle_turn(GameClientData* game_data);
 void handle_game_update(GameClientData* game_data);
+void handle_game_over(GameClientData* game_data);
 int coord_to_index(Vector2D vector2d, int width);
 
 void client_wait_for_hit_result(GameClientData* game_data);

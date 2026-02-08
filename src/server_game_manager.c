@@ -110,6 +110,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         // Check if game ended while we were waiting
         if (shm->is_game_over) {
             send_message(player.fd, GAME_OVER, strlen(GAME_OVER));
+            char score_buffer[4];
+            int_serialize(score_buffer, shm->players[player_index].score);
+            send_message(player.fd, score_buffer, 4);
             break;
         }
 
