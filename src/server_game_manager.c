@@ -33,11 +33,11 @@ void* game_update_thread(void *arg) {
     // Might be a synchronization problem later
     while (1) {
         sem_wait(&shm->game_update);
-        if (shm->current_player_index == our_index)
-            continue;
-        send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
+        if (shm->current_player_index != our_index)
+            send_message(fd, GAME_UPDATE, strlen(GAME_UPDATE));
         int msg_len = hitresult_serialize(&shm->hit_result, msg);
         send_message(fd, msg, msg_len);
+        sem_post(&shm->complete_game_update);
     }
 
     return NULL;
@@ -135,7 +135,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         printf("[Child %d] Player shot!\n", player_index);
         sem_post(&shm->client_shot);
 
-        sem_wait(&shm->complete_game_update);
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_wait(&shm->complete_game_update);
+        }
 
         // --- END TURN ---
         // Signal the Scheduler that we are done.
@@ -163,10 +165,7 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->turn_notified_sem);
 
         sem_wait(&shm->client_shot);
-        // Notify all child processes
-        for (int i = 0; i < shm->player_num-1; i++) {
-            sem_post(&shm->game_update);
-        }
+
         // Update the battlefield
         printf("Player %d (%s) shot at (%d,%d)\n",
                shm->current_player_index,
@@ -203,12 +202,15 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             }
         }
 
-        i++;
-        if (i == 3) {
-            printf("Game finished\n");
+        if (i == 2) {
             shm->is_game_over = true;
         }
 
-        sem_post(&shm->complete_game_update);
+        // Notify all child processes
+        for (int i = 0; i < shm->player_num; i++) {
+            sem_post(&shm->game_update);
+        }
+
+        i++;
     }
 }
