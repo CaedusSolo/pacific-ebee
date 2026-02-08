@@ -1,5 +1,4 @@
 #include "battlefield.h"
-#include "constants.h"
 #include "player.h"
 #include "server_connection.h"
 #include "server_game_manager.h"
@@ -14,6 +13,8 @@
 #include <pthread.h>
 #include <string.h>
 #include <inttypes.h>
+
+#define SCORE_FILENAME "scores.txt"
 
 // Flow:
 // Start server connection
@@ -78,6 +79,34 @@ void handle_sigchld(int sig) {
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
+// Write players to CSV
+void write_scores_to_file(FILE* file, ScoreInfo score_info[], int count) {
+    if (file == NULL) return;
+    fprintf(file, "name,previous_score,highscore\n");
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s,%d,%d\n", score_info[i].name,
+                score_info[i].previous_score, score_info[i].highscore);
+    }
+}
+
+// Read players from CSV
+int read_from_scores_file(FILE* file, ScoreInfo score_info[]) {
+    if (file == NULL) return 0;
+
+    char line[256];
+    fgets(line, sizeof(line), file); // Skip header
+
+    int count = 0;
+    while (fgets(line, sizeof(line), file)) {
+        sscanf(line, "%[^,],%d,%d",
+               score_info[count].name,
+               &score_info[count].previous_score,
+               &score_info[count].highscore);
+        count++;
+    }
+    return count;
+}
+
 int main(int argc, char *argv[]) {
     signal(SIGINT, handle_sigint);
     signal(SIGCHLD, handle_sigchld);
@@ -94,6 +123,16 @@ int main(int argc, char *argv[]) {
     }
 
     global_shm->battlefield_size = battlefield_size;
+
+    // Open score file, create if it doesn't exist
+    FILE* score_file = fopen(SCORE_FILENAME, "r+");
+    if (score_file == NULL) {
+        score_file = fopen(SCORE_FILENAME, "w");
+        fclose(score_file);
+        score_file = fopen(SCORE_FILENAME, "r+");
+    }
+
+    read_from_scores_file(score_file, global_shm->score_infos);
 
     // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
@@ -113,9 +152,6 @@ int main(int argc, char *argv[]) {
             i--;  // try again
             continue;
         }
-
-        global_shm->players[i].total_hits = 0;
-        global_shm->players[i].score = 0;
 
         // Mark connected in shared memory
         global_shm->players[i].connected = true;
@@ -152,8 +188,14 @@ int main(int argc, char *argv[]) {
     pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
     game_loop(global_shm, &battlefield);
 
+    // Write back the score file
+    write_scores_to_file(score_file, global_shm->score_infos, num_players);
+    shared_memory_destroy(global_shm);
+
     // pthread_join(log_tid, NULL);
     pthread_join(sched_tid, NULL);
 
     return 0;
 }
+
+
