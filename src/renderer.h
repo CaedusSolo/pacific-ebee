@@ -23,7 +23,7 @@
 #define ANSI_RESET_ALL "\033[0m"
 
 // player count, battlefield size, player (own) grid?
-void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard);
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE], bool isOurBoard);
 
 
 #endif

@@ -22,13 +22,13 @@ void handle_game_start(GameClientData* game_data) {
     }
     printf("Player names acquired!\n");
 
-    char player_index_buffer[4];
-    listen_for_message(game_data->fd, player_index_buffer);
-    int player_index = int_deserialize(player_index_buffer);
-    game_data->player_index = player_index;
-    printf("Player index: %d\n", game_data->player_index);
+    char battlefield_size_buffer[4];
+    listen_for_message(game_data->fd, battlefield_size_buffer);
+    int battlefield_size = int_deserialize(battlefield_size_buffer);
+    game_data->battlefield_size = battlefield_size;
+    printf("Battlefield size acquired: %d\n", game_data->battlefield_size);
 
-    grid(BATTLEFIELD_SIZE, game_data->ships_board, true);
+    grid(game_data->battlefield_size, game_data->ships_board, true);
 }
 
 void handle_turn(GameClientData* game_data) {
@@ -44,7 +44,7 @@ void handle_turn(GameClientData* game_data) {
     vector2d_serialize(&pos, pos_buffer);
     send_message(fd, pos_buffer, 8);
 
-    game_data->attacks_board[coord_to_index(pos, BATTLEFIELD_SIZE)] = 'O';
+    game_data->attacks_board[coord_to_index(pos, game_data->battlefield_size)] = 'O';
 }
 
 void handle_game_update(GameClientData* game_data) {
