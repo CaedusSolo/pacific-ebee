@@ -7,5 +7,6 @@
 #define MAX_LOG_LENGTH 256
 #define HIT_SCORE 10
 #define SUNK_SCORE 20
+#define LOG_QUEUE_SIZE 100
 
 #endif  // CONSTANTS_H

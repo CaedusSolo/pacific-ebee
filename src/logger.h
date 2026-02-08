@@ -5,7 +5,7 @@
 
 void *logger_thread(void *arg); // logger thread loop
 
-void log_event(SharedMemory *shm, const char* format);
+void log_event(SharedMemory *shm, const char* format, ...);
 
 
 #endif
