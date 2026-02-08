@@ -1,30 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "game_client_manager.h"
 #include "connection.h"
 #include "constants.h"
 #include "renderer.h"
 #include "messages.h"
+#include "vector2d.h"
 
 
-void handle_game_start(GameClientData* game_client_data) {
+void handle_game_start(GameClientData* game_data) {
     // Get battlefield
-    char bf_buffer[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
-    listen_for_message(game_client_data->fd, bf_buffer);
+    listen_for_message(game_data->fd, game_data->ships_board);
     printf("Battlefield acquired!\n");
 
-    char player_index_buffer[4];
-    listen_for_message(game_client_data->fd, player_index_buffer);
-    int player_index = int_deserialize(player_index_buffer);
-    game_client_data->player_index = player_index;
-    printf("Player index: %d\n", game_client_data->player_index);
+    char player_names_buffer[256*PLAYER_NUM];
+    listen_for_message(game_data->fd, player_names_buffer);
+    for (int i = 0; i < PLAYER_NUM; i++) {
+        memcpy(game_data->player_names[i], player_names_buffer + (256*i), 256);
+    }
+    printf("Player names acquired!\n");
 
-    grid(BATTLEFIELD_SIZE, bf_buffer, true);
+    char player_index_buffer[4];
+    listen_for_message(game_data->fd, player_index_buffer);
+    int player_index = int_deserialize(player_index_buffer);
+    game_data->player_index = player_index;
+    printf("Player index: %d\n", game_data->player_index);
+
+    grid(BATTLEFIELD_SIZE, game_data->ships_board, true);
 }
 
-void handle_turn(GameClientData* game_client_data) {
-    int fd = game_client_data->fd;
+void handle_turn(GameClientData* game_data) {
+    int fd = game_data->fd;
 
     send_message(fd, READY_FOR_TURN, 15);
     int x, y;
@@ -35,80 +43,22 @@ void handle_turn(GameClientData* game_client_data) {
     char pos_buffer[8];
     vector2d_serialize(&pos, pos_buffer);
     send_message(fd, pos_buffer, 8);
+
+    game_data->attacks_board[coord_to_index(pos, BATTLEFIELD_SIZE)] = 'O';
 }
 
-void handle_game_update(GameClientData* game_client_data) {
-    int fd = game_client_data->fd;
+void handle_game_update(GameClientData* game_data) {
+    int fd = game_data->fd;
 
-    char update_msg[8];
+    char update_msg[272];
     size_t update_msg_len;
     listen_for_message(fd, update_msg);
-    Vector2D ans = vector2d_deserialize(update_msg);
-    printf("Game update: (%d, %d)\n", ans.x, ans.y);
+    HitResult hr;
+    hitresult_deserialize(&hr, update_msg);
+    printf("Game update!\n");
+    hitresult_print(&hr);
 }
 
-void gameLoop(GameClientData* game_client_manager) {
-    // this->sendReadySignal();
-    // this->waitForGameReady();
-    //
-    // string playerName = this->askPlayerName();
-    // this->sendPlayerName(playerName);
-    //
-    // this->listenForNewBattlefield();
-    //
-    // bool isOurTurn = this->listenForFirstTurnDecision();
-    //
-    // GameStatus gameStatus = GameStatus::ONGOING;
-    // while (gameStatus == GameStatus::ONGOING) {
-    //     this->renderer.grid(PLAYER_NUM, battlefield);
-    //
-    //     if (isOurTurn) {
-    //         Vector2D coords = this->askShotCoords();
-    //         HitResult result = this->sendShot(coords);
-    //         this->processHitResult(result, false);
-    //
-    //         isOurTurn = false;
-    //     }
-    //     else {
-    //         HitResult opponentShotResult = this->listenForOpponentShot();
-    //         this->processHitResult(opponentShotResult, true);
-    //
-    //         isOurTurn = true;
-    //     }
-    // }
-    //
-    // gameStatus = this->listenForGameStatus();
-    // switch (gameStatus) {
-    //     case GameStatus::WON:
-    //         this->endGame(true);
-    //         break;
-    //     case GameStatus::LOST:
-    //         this->endGame(false);
-    //         break;
-    //     case GameStatus::ONGOING:
-    //         break;
-    // }
+int coord_to_index(Vector2D vector2d, int width) {
+    return vector2d.x + (vector2d.y * width);
 }
-
-// void GameClientManager::endGame(bool isWinner) {
-//     // int score = this->listenForFinalScore();
-//     // if (isWinner) {
-//     //     this->renderer.showWin();
-//     // } else {
-//     //     this->renderer.showLose();
-//     // }
-// }
-//
-// void GameClientManager::processHitResult(const HitResult& result, bool isOpponent) {
-//     // switch (result.type) {
-//     //     case HitResult::Type::MISS:
-//     //         this->renderer.showMiss(result.position, isOpponent);
-//     //         break;
-//     //     case HitResult::Type::HIT:
-//     //         this->renderer.showHit(result.position, isOpponent);
-//     //         break;
-//     //     case HitResult::Type::SINK:
-//     //         this->renderer.showSunk(result.position, isOpponent, result.shipSunk);
-//     //         break;
-//     // }
-// }
