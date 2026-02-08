@@ -40,7 +40,7 @@ void *logger_thread(void *arg) {
     return NULL;
 }
 
-void log_event(SharedMemory *shm, const char* format) {
+void log_event(SharedMemory *shm, const char* format, ...) {
     if (!shm) return;
 
     char buffer[MAX_LOG_LENGTH];

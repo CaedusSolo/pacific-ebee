@@ -4,6 +4,7 @@
 #include "server_connection.h"
 #include "server_game_manager.h"
 #include "shared_memory.h"
+#include "logger.h"
 #include <semaphore.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -23,16 +24,6 @@
 
 // Global pointer for signal handlers
 SharedMemory* global_shm = NULL;
-
-void* logger_thread(void* arg) {
-    SharedMemory* shm = (SharedMemory*)arg;
-    while (1) {
-        sem_wait(&shm->log_count_sem);
-        // ... Log writing logic ...
-        // printf("Logger thread woke up\n");
-    }
-    return NULL;
-}
 
 void* scheduler_thread(void* arg) {
     SharedMemory* shm = (SharedMemory*)arg;
@@ -91,15 +82,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    global_shm->log_head = 0;
+    global_shm->log_tail = 0;
+
     // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
-    // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
+    pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
 
     Battlefield battlefield = battlefield_new(BATTLEFIELD_SIZE, BATTLEFIELD_SIZE);
 
     // Network Setup
     int listening_fd = server_connection_start(port);
     printf("[Server] Waiting for %d players on port %d...\n", num_players, port);
+
+    log_event(global_shm, "Server listening on port %d", port);
 
     // Accept & Fork Loop
     for (int i = 0; i < num_players; i++) {
@@ -126,6 +122,8 @@ int main(int argc, char *argv[]) {
             close(listening_fd);
             Player current_player;
             current_player.fd = client_fd;
+
+            log_event(global_shm, "Player %d connected!", i);
 
             handle_player(current_player, i, global_shm);
             // pass semaphore details to child process

@@ -20,6 +20,7 @@ typedef struct {
     bool game_running;
     bool is_game_over;
     int current_player_index;
+    int battlefield_size;
 
     // Messaging between main process and child processes
     Vector2D shoot_position;
@@ -29,6 +30,11 @@ typedef struct {
     pthread_mutex_t logger_mutex;
     sem_t log_count_sem;
     pthread_mutex_t game_state_mutex;
+
+
+    LogMessage log_queue[LOG_QUEUE_SIZE];
+    int log_head;
+    int log_tail;
 
     sem_t notify_turn_sem;
     sem_t turn_notified_sem;
