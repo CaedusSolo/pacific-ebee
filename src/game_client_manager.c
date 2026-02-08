@@ -75,7 +75,6 @@ int coord_to_index(Vector2D vector2d, int width) {
 
 void client_wait_for_hit_result(GameClientData* game_data) {
     char update_msg[272];
-    size_t update_msg_len;
     listen_for_message(game_data->fd, update_msg);
     HitResult hr;
     hitresult_deserialize(&hr, update_msg);
@@ -83,7 +82,7 @@ void client_wait_for_hit_result(GameClientData* game_data) {
     char new_value;
     char* attacker_name;
     char* victim_name;
-    char msg[200];
+    char msg[1000];
 
     if (hr.attacker_index != game_data->our_index)
         attacker_name = game_data->player_names[hr.attacker_index];
