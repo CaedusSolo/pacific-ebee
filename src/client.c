@@ -35,8 +35,8 @@ int main (int argc, char *argv[]) {
     GameClientData game_data = {
         .fd = fd,
     };
-    memset(game_data.ships_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
-    memset(game_data.attacks_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+    memset(game_data.ships_board, ' ', MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE);
+    memset(game_data.attacks_board, ' ', MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE);
 
     char buffer[100];
     memset(buffer, 0, 100);

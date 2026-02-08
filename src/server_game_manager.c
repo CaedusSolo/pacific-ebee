@@ -60,7 +60,8 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     // Send ship arrays
     // Get the main process to generate the array
     sem_wait(&shm->get_ships_array[player_index]);
-    send_message(player.fd, shm->ships_array, BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+    size_t ships_array_len = shm->battlefield_size * shm->battlefield_size;
+    send_message(player.fd, shm->ships_array, ships_array_len);
     sem_post(&shm->done_ships_array);
 
     // Send all players name
@@ -71,9 +72,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     send_message(player.fd, names_buffer, 256*PLAYER_NUM);
 
     // Send the player index
-    char player_index_buffer[4];
-    int_serialize(player_index_buffer, player_index);
-    send_message(player.fd, player_index_buffer, 4);
+    char battlefield_size_buffer[4];
+    int_serialize(battlefield_size_buffer, shm->battlefield_size);
+    send_message(player.fd, battlefield_size_buffer, 4);
 
     // Separate thread to send game update states
     ThreadArgs thr_args = {

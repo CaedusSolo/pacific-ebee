@@ -13,6 +13,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 #include <string.h>
+#include <inttypes.h>
 
 // Flow:
 // Start server connection
@@ -82,7 +83,8 @@ int main(int argc, char *argv[]) {
     signal(SIGCHLD, handle_sigchld);
 
     int port = 8999;
-    int num_players = 3;
+    const int num_players = argv[2] ? strtoumax(argv[2], NULL, 10) : 3;
+    const int battlefield_size = 5 + (num_players * 5);
 
     // Initialize Shared Memory
     global_shm = shared_memory_init(num_players);
@@ -91,11 +93,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    global_shm->battlefield_size = battlefield_size;
+
     // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
     // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
 
-    Battlefield battlefield = battlefield_new(BATTLEFIELD_SIZE, BATTLEFIELD_SIZE);
+    Battlefield battlefield = battlefield_new(battlefield_size, battlefield_size);
 
     // Network Setup
     int listening_fd = server_connection_start(port);

@@ -23,8 +23,8 @@ void displayBanner(void) {
 }
 
 
-void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool isOurBoard){
-    if (size > BATTLEFIELD_SIZE) size = BATTLEFIELD_SIZE;
+void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE], bool isOurBoard){
+    if (size > MAX_BATTLEFIELD_SIZE) size = MAX_BATTLEFIELD_SIZE;
 
     printf("   ");
 
@@ -43,7 +43,7 @@ void grid(int size, char battlefield[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE], bool 
         printf("%2d ", r + 1);
 
         for (int c = 0; c < size; c++) {
-            int index = c + (r * BATTLEFIELD_SIZE);
+            int index = c + (r * MAX_BATTLEFIELD_SIZE);
 
             char cell = battlefield[index];
 
