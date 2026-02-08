@@ -1,12 +1,11 @@
 #ifndef SHARED_MEMORY_H
 #define SHARED_MEMORY_H
 
-#define _XOPEN_SOURCE 700
-
 #include "messages.h"
 #include "constants.h"
 #include "player.h"
 #include "vector2d.h"
+#include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
@@ -14,6 +13,13 @@
 typedef struct {
    char message[MAX_LOG_LENGTH] ;
 } LogMessage;
+
+typedef struct {
+    char name[50];
+    int previous_score;
+    int highscore;
+} ScoreInfo;
+
 
 typedef struct {
     int player_num;
@@ -51,6 +57,7 @@ typedef struct {
     sem_t get_ships_array[MAX_PLAYER_NUM];
 
     Player players[MAX_PLAYER_NUM];
+    ScoreInfo score_infos[MAX_PLAYER_NUM];
 
     char ships_array[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE];
 } SharedMemory;
