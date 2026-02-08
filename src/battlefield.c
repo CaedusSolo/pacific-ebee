@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include "game_states.h"
 
 Battlefield battlefield_new(int width, int height) {
     Battlefield self;
@@ -54,18 +55,6 @@ int battlefield_get_height(const Battlefield* self) {
 void battlefield_update_cell(Battlefield* self, int x, int y, Cell cell) {
     if (x >= 0 && x < self->width && y >= 0 && y < self->height) {
         self->grid[y][x] = cell;
-    }
-}
-
-// Helper function to get ship size
-static int get_ship_size(enum Ship ship) {
-    switch(ship) {
-        case CARRIER: return 5;
-        case BATTLESHIP: return 4;
-        case CRUISER: return 3;
-        case DESTROYER: return 3;
-        case PATROL_BOAT: return 2;
-        default: return 0;
     }
 }
 
