@@ -104,6 +104,8 @@ int read_from_scores_file(FILE* file, ScoreInfo score_info[]) {
 }
 
 int main(int argc, char *argv[]) {
+
+server_start:
     signal(SIGINT, handle_sigint);
     signal(SIGCHLD, handle_sigchld);
 
@@ -204,6 +206,8 @@ int main(int argc, char *argv[]) {
 
     // pthread_join(log_tid, NULL);
     pthread_join(sched_tid, NULL);
+
+    goto server_start;
 
     return 0;
 }
