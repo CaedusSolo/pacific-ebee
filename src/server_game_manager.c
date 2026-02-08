@@ -56,6 +56,11 @@ void send_init_data(Player player, int player_index, SharedMemory* shm) {
     int_serialize(player_num_buffer, shm->player_num);
     send_message(player.fd, player_num_buffer, 4);
 
+    // Send player index
+    char their_index_buffer[4];
+    int_serialize(their_index_buffer, player_index);
+    send_message(player.fd, their_index_buffer, 4);
+
     // Send all players name
     char names_buffer[256 * shm->player_num];
     for (int i = 0; i < shm->player_num; i++) {
@@ -176,6 +181,7 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         shm->hit_result.position = pos;
         shm->hit_result.type = MISS;
+        shm->hit_result.attacker_index = shm->current_player_index;
 
         // Check who got shot
         for (int i = 0; i < shm->player_num; i++) {
@@ -187,7 +193,6 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             *ship_hits += 1;
             shm->players[shm->current_player_index].score += HIT_SCORE;
             shm->hit_result.type = HIT;
-            shm->hit_result.attacker_index = shm->current_player_index;
             shm->hit_result.victim_index = i;
 
             // The ship got hit in all places
