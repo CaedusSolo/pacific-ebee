@@ -311,6 +311,33 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
                 shm->is_game_over = true;
                 update_score_infos(shm);
                 log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
+                int max_score = -1;
+                for (int k = 0; k < shm->player_num; k++) {
+                    if (shm->players[k].score > max_score) {
+                        max_score = shm->players[k].score;
+                    }
+                }
+
+                // 2. Identify all players with the maximum score
+                char winners_str[1024] = ""; // Large buffer to hold multiple names
+                int winner_count = 0;
+
+                for (int k = 0; k < shm->player_num; k++) {
+                    if (shm->players[k].score == max_score) {
+                        if (winner_count > 0) {
+                            strcat(winners_str, " & ");
+                        }
+                        strcat(winners_str, shm->players[k].name);
+                        winner_count++;
+                    }
+                }
+
+                // 3. Log appropriate message
+                if (winner_count > 1) {
+                    log_event(shm, "RESULT: IT'S A TIE! Winners: %s (Score: %d)", winners_str, max_score);
+                } else {
+                    log_event(shm, "RESULT: WINNER! %s (Score: %d)", winners_str, max_score);
+                }
             }
         }
 
