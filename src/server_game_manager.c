@@ -6,6 +6,7 @@
 #include "messages.h"
 #include "player.h"
 #include "shared_memory.h"
+#include "logger.h"
 #include "vector2d.h"
 #include <bits/pthreadtypes.h>
 #include <pthread.h>
@@ -24,6 +25,54 @@ typedef struct ThreadArgs {
     int our_index;
     int fd;
 } ThreadArgs;
+
+// replicate renderer but for log
+void log_battlefield(SharedMemory* shm, Battlefield* bf) {
+    log_event(shm, "--- BATTLEFIELD STATE ---");
+
+    // Header Row (A B C ...)
+    char header[512];
+    char* ptr = header;
+    ptr += sprintf(ptr, "   ");
+    for (int x = 0; x < battlefield_get_width(bf); x++) {
+        if (x < 26) ptr += sprintf(ptr, " %c ", 'A' + x);
+        else ptr += sprintf(ptr, " %c ", 'a' + (x - 26));
+    }
+    log_event(shm, header);
+
+    // Grid Rows
+    for (int y = 0; y < battlefield_get_height(bf); y++) {
+        char row_str[512];
+        ptr = row_str;
+        ptr += sprintf(ptr, "%2d ", y + 1); // Row Number (1-based)
+
+        for (int x = 0; x < battlefield_get_width(bf); x++) {
+            Cell* cell = battlefield_get_cell(bf, x, y);
+            char sym = '.';
+
+            // Check ship presence
+            bool has_ship = false;
+            for (int p = 0; p < shm->player_num; p++) {
+                if (cell->has_ship[p]) {
+                    has_ship = true;
+                    break;
+                }
+            }
+
+            if (cell->is_shot) {
+                if (has_ship) sym = 'X'; // Hit
+                else sym = 'O'; // Miss
+            } else {
+                if (has_ship) sym = 'S'; // Ship
+                else sym = '.'; // Empty
+            }
+
+            ptr += sprintf(ptr, " %c ", sym);
+        }
+        log_event(shm, row_str);
+    }
+    log_event(shm, "-------------------------");
+}
 
 void* game_update_thread(void *arg) {
     ThreadArgs* thr_args = (ThreadArgs*)arg;
@@ -82,6 +131,9 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     strcpy(player.name, name);
     strcpy(shm->players[player_index].name, name);
 
+    // Log Connection
+    log_event(shm, "CONNECTION: Player %d connected as '%s'", player_index, name);
+
     memset(player.ship_hits, 0, ALL_SHIPS_COUNT);
 
     printf("[Child %d] Connected. Waiting for other players...\n", player_index);
@@ -137,6 +189,13 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         char input[8];
         listen_for_message(player.fd, input);
         shm->shoot_position = vector2d_deserialize(input);
+
+        // Log the shot attempt
+        log_event(shm, "ACTION: %s shot at (%d, %d)",
+                  shm->players[player_index].name,
+                  shm->shoot_position.x,
+                  shm->shoot_position.y);
+
         printf("[Child %d] Player shot!\n", player_index);
         sem_post(&shm->client_shot);
 
@@ -161,6 +220,9 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->done_ships_array);
     }
 
+    log_event(shm, "GAME START: All players ready.");
+    log_battlefield(shm, battlefield);
+
     int kk = 0;
 
     while (1) {
@@ -184,36 +246,64 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
 
         Vector2D pos = shm->shoot_position;
         Cell* cell = battlefield_get_cell(battlefield, pos.x, pos.y);
-        cell->is_shot = true;
+
+        if (cell) cell->is_shot = true;
 
         shm->hit_result.position = pos;
         shm->hit_result.type = MISS;
         shm->hit_result.attacker_index = shm->current_player_index;
 
+        bool hit_detected = false;
+
         // Check who got shot
         for (int i = 0; i < shm->player_num; i++) {
-            if (!cell->has_ship[i])
+            if (!cell || !cell->has_ship[i])
                 continue;
 
             enum Ship ship_type = cell->ship_types[i];
             Player* victim = &shm->players[i];
+
+            // Update Stats
             victim->ship_hits[ship_type] += 1;
             victim->total_hits += 1;
-
             attacker->score += HIT_SCORE;
+
+            // Set Result
             shm->hit_result.type = HIT;
             shm->hit_result.victim_index = i;
+            hit_detected = true;
 
-            // Game ends if one player have nothing left
+            // Check if specific ship is sunk (for Logging)
+            if (victim->ship_hits[ship_type] == get_ship_size(ship_type)) {
+                 // Victim Ship Sunk Logic
+                 victim->is_sunk[ship_type] = true;
+                 attacker->score += SUNK_SCORE;
+                 shm->hit_result.type = SINK;
+                 log_event(shm, "RESULT: SINK! %s sunk %s's ship!", attacker->name, victim->name);
+            } else {
+                 log_event(shm, "RESULT: HIT! %s hit %s's ship!", attacker->name, victim->name);
+            }
+
+            // Game ends if one player has nothing left
             if (victim->total_hits == ALL_SHIPS_COORDS_COUNT) {
                 shm->is_game_over = true;
+                log_event(shm, "GAME OVER: Player %s has lost all ships.", victim->name);
             }
         }
+
+        if (!hit_detected) {
+            log_event(shm, "RESULT: MISS! %s missed at (%d, %d).", attacker->name, pos.x, pos.y);
+        }
+
+        // Log the board state after the move
+        log_battlefield(shm, battlefield);
 
         kk++;
 
         if (kk == 3 && LOSE_EARLY) {
+            printf("Game finished (LOSE_EARLY)\n");
             shm->is_game_over = true;
+            log_event(shm, "GAME OVER: Turn limit reached.");
         }
 
         // Notify all child processes
