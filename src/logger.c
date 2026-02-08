@@ -21,13 +21,13 @@ void *logger_thread(void *arg) {
         sem_wait(&shm->log_count_sem);  // wait for signal
         pthread_mutex_lock(&shm->logger_mutex); // lock
 
-        if (shm->log_head != shm_log_tail) {
+        if (shm->log_head != shm->log_tail) {
             char *msg = shm->log_queue[shm->log_head].message;
 
             time_t now = time(NULL);
             struct tm* time = localtime(&now);
             char time_str[64];
-            strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", t);
+            strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", time);
 
             fprintf(lf, "[%s] %s\n", time_str, msg);
             fflush(lf);
@@ -53,6 +53,8 @@ void log_event(SharedMemory *shm, const char* format, ...) {
     // lock mutex to block
     pthread_mutex_lock(&shm->logger_mutex);
 
+    int next = (shm->log_tail + 1) % LOG_QUEUE_SIZE;
+
     if (next != shm->log_head) {
         // copy message to shared memory
         strncpy(shm->log_queue[shm->log_tail].message, buffer, MAX_LOG_LENGTH - 1);
@@ -61,7 +63,7 @@ void log_event(SharedMemory *shm, const char* format, ...) {
 
         sem_post(&shm->log_count_sem);
     } else {
-        fprintf(stderr, "[Logger] Queue is full! Message: %s\n", buffer)
+        fprintf(stderr, "[Logger] Queue is full! Message: %s\n", buffer);
     }
 
     // unlock mutex after done
