@@ -32,7 +32,7 @@ void handle_game_start(GameClientData* game_data) {
     game_data->battlefield_size = battlefield_size;
     printf("Battlefield size acquired: %d\n", game_data->battlefield_size);
 
-    grid(game_data->battlefield_size, game_data->ships_board, true);
+    grid(game_data->battlefield_size, game_data->ships_board);
 }
 
 void handle_turn(GameClientData* game_data) {
