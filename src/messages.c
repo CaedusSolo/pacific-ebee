@@ -76,3 +76,25 @@ int hitresult_deserialize(HitResult* hr, const char* buffer) {
 
     return 0;
 }
+
+void hitresult_print(const HitResult* hr) {
+    if (!hr) return;
+
+    const char* type_str;
+    switch (hr->type) {
+        case MISS: type_str = "MISS"; break;
+        case HIT:  type_str = "HIT"; break;
+        case SINK: type_str = "SINK"; break;
+        default:   type_str = "UNKNOWN"; break;
+    }
+
+    if (hr->type == SINK || hr->type == HIT) {
+        printf("Attacker: %d, Victim: %d\n", hr->attacker_index, hr->victim_index);
+    }
+
+    printf("Type: %s, Position: (%d, %d)\n", type_str, hr->position.x, hr->position.y);
+
+    if (hr->type == SINK) {
+        printf(", Ship Sunk: %d\n", hr->ship_sunk);
+    }
+}
