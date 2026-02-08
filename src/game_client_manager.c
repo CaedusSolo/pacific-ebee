@@ -4,7 +4,6 @@
 
 #include "game_client_manager.h"
 #include "connection.h"
-#include "constants.h"
 #include "renderer.h"
 #include "messages.h"
 #include "vector2d.h"
@@ -15,9 +14,14 @@ void handle_game_start(GameClientData* game_data) {
     listen_for_message(game_data->fd, game_data->ships_board);
     printf("Battlefield acquired!\n");
 
-    char player_names_buffer[256*PLAYER_NUM];
+    char player_count_buffer[4];
+    listen_for_message(game_data->fd, player_count_buffer);
+    int player_count = int_deserialize(player_count_buffer);
+    game_data->player_count = player_count;
+
+    char player_names_buffer[256*game_data->player_count];
     listen_for_message(game_data->fd, player_names_buffer);
-    for (int i = 0; i < PLAYER_NUM; i++) {
+    for (int i = 0; i < game_data->player_count; i++) {
         memcpy(game_data->player_names[i], player_names_buffer + (256*i), 256);
     }
     printf("Player names acquired!\n");

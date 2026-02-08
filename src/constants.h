@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 #define MAX_BATTLEFIELD_SIZE 50
-#define PLAYER_NUM 3
+#define MAX_PLAYER_NUM 3
 #define MAX_LOG_LENGTH 256
 #define HIT_SCORE 10
 #define SUNK_SCORE 20

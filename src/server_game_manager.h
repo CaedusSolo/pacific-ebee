@@ -18,7 +18,7 @@ typedef struct ServerGameManager{
     int num_players;
     int current_player_index;
     int listening_fd;
-    Player players[PLAYER_NUM];
+    Player players[MAX_PLAYER_NUM];
 } ServerGameManager;
 
 ServerGameManager server_game_manager_create(int num_players, int listening_fd);
