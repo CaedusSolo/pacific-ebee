@@ -10,7 +10,7 @@ cd src/
 make
 
 # To run:
-bin/server
+bin/server [player_count]
 
 # In separate terminal, replace [name] with the client's name
 bin/client [name]
