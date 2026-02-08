@@ -55,10 +55,12 @@ void handle_turn(GameClientData* game_data) {
     vector2d_serialize(&pos, pos_buffer);
     send_message(fd, pos_buffer, 8);
     client_wait_for_hit_result(game_data);
+    grid(game_data->battlefield_size, game_data->game_board);
 }
 
 void handle_game_update(GameClientData* game_data) {
     client_wait_for_hit_result(game_data);
+    grid(game_data->battlefield_size, game_data->game_board);
 }
 
 int coord_to_index(Vector2D vector2d, int width) {
