@@ -55,9 +55,11 @@ void grid(int size, char battlefield[MAX_BATTLEFIELD_SIZE * MAX_BATTLEFIELD_SIZE
                 case BF_OUR_SHIP:
                     printf("%s%s S ", ANSI_BG_BLUE, ANSI_BLUE);
                 	break;
+                case BF_OTHER_SHIP_ATTACKED:
                 case BF_OUR_SHIP_ATTACKED:
-                    printf("%s%s%s X ", ANSI_BG_BLUE, ANSI_RED, ANSI_BOLD);
+                    printf("%s%s%s X ", ANSI_BG_GREY, ANSI_RED, ANSI_BOLD);
                     break;
+
                 default:
                     printf(" . ");
             }
