@@ -42,14 +42,32 @@ void handle_game_start(GameClientData* game_data) {
     grid(game_data->battlefield_size, game_data->game_board);
 }
 
+int letter_to_number(char c) {
+    if (c >= 'A' && c <= 'Z') {
+        return c - 'A' + 1;  // A=1, B=2, ..., Z=26
+    }
+    if (c >= 'a' && c <= 'z') {
+        return c - 'a' + 27;  // a=27, b=28, ..., z=52
+    }
+    return -1;  // Invalid character
+}
+
 void handle_turn(GameClientData* game_data) {
     int fd = game_data->fd;
 
-    send_message(fd, READY_FOR_TURN, 15);
-    int x, y;
+    send_message(fd, READY_FOR_TURN, sizeof(READY_FOR_TURN));
+    int y, x; char x_char;
     printf("Enter coords: ");
-    scanf("%d %d", &x, &y);
-    Vector2D pos = vector2d_create(x, y);
+
+    scanf("%c %d", &x_char, &y);
+    char c;
+    // Clean standard input
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf("Read: %c %d\n", x_char, y);
+
+    x = letter_to_number(x_char);
+    // Minus 1 to turn into indices
+    Vector2D pos = vector2d_create(x - 1, y - 1);
 
     char pos_buffer[8];
     vector2d_serialize(&pos, pos_buffer);
@@ -59,7 +77,6 @@ void handle_turn(GameClientData* game_data) {
 
 void handle_game_update(GameClientData* game_data) {
     client_wait_for_hit_result(game_data);
-    grid(game_data->battlefield_size, game_data->game_board);
 }
 
 void handle_game_over(GameClientData* game_data) {

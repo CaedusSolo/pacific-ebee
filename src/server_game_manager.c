@@ -78,7 +78,7 @@ void* game_update_thread(void *arg) {
     int our_index = thr_args->our_index;
     int fd = thr_args->fd;
 
-    char msg[272];
+    char msg[500];
     // Might be a synchronization problem later
     while (1) {
         sem_wait(&shm->game_update);
@@ -87,6 +87,7 @@ void* game_update_thread(void *arg) {
         int msg_len = hitresult_serialize(&shm->hit_result, msg);
         send_message(fd, msg, msg_len);
         sem_post(&shm->complete_game_update);
+        if (shm->is_game_over) break;
     }
 
     return NULL;
@@ -132,7 +133,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
     // Log Connection
     log_event(shm, "CONNECTION: Player %d connected as '%s'", player_index, name);
 
-    memset(player.ship_hits, 0, ALL_SHIPS_COUNT);
+    memset(player.ship_hits, 0, ALL_SHIPS_COUNT * sizeof(int));
 
     printf("[Child %d] Connected. Waiting for other players...\n", player_index);
 
@@ -175,7 +176,7 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         sem_wait(&shm->notify_turn_sem);
         send_message(player.fd, YOUR_TURN, strlen(YOUR_TURN));
 
-        char resp[20];
+        char resp[100];
         // do {
         listen_for_message(player.fd, resp);
         // } while(strcmp(resp, READY_FOR_TURN) != 0);
@@ -183,7 +184,6 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
         sem_post(&shm->turn_notified_sem);
 
         // Wait for client input shooting position (Blocking read)
-        size_t len;
         char input[8];
         listen_for_message(player.fd, input);
         shm->shoot_position = vector2d_deserialize(input);
@@ -215,8 +215,8 @@ void handle_player(Player player, int player_index, SharedMemory* shm) {
 void update_score_infos(SharedMemory *shm) {
     for (int i = 0; i < shm->player_num; i++) {
         ScoreInfo* score_info = &shm->score_infos[i];
-        for (int j = 0; j < shm->player_num; i++) {
-            Player* player = &shm->players[i];
+        for (int j = 0; j < shm->player_num; j++) {
+            Player* player = &shm->players[j];
             if (!strcmp(score_info->name, player->name)) {
                 if (player->score > score_info->highscore)
                     score_info->highscore = player->score;
@@ -236,11 +236,13 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
     log_event(shm, "GAME START: All players ready.");
     log_battlefield(shm, battlefield);
 
-    int kk = 0;
-
     while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
+
+        if (shm->is_game_over) {
+            break;
+        }
 
         sem_post(&shm->notify_turn_sem);
         sem_wait(&shm->turn_notified_sem);
@@ -260,7 +262,10 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         Vector2D pos = shm->shoot_position;
         Cell* cell = battlefield_get_cell(battlefield, pos.x, pos.y);
 
-        if (cell) cell->is_shot = true;
+        if (cell) {
+            cell->is_shot = true;
+            cell->attacker_index = shm->current_player_index;
+        }
 
         shm->hit_result.position = pos;
         shm->hit_result.type = MISS;
