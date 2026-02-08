@@ -87,6 +87,7 @@ void* game_update_thread(void *arg) {
         int msg_len = hitresult_serialize(&shm->hit_result, msg);
         send_message(fd, msg, msg_len);
         sem_post(&shm->complete_game_update);
+        if (shm->is_game_over) break;
     }
 
     return NULL;
@@ -238,6 +239,10 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
     while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
+
+        if (shm->is_game_over) {
+            break;
+        }
 
         sem_post(&shm->notify_turn_sem);
         sem_wait(&shm->turn_notified_sem);

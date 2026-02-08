@@ -54,6 +54,7 @@ void* scheduler_thread(void* arg) {
     for (int i = 0; i < shm->player_num; i++) {
         sem_post(&shm->turn_sem[i]);
     }
+    sem_post(&shm->change_turn_sem);
 
     return NULL;
 }
@@ -162,6 +163,11 @@ server_start:
         // Mark connected in shared memory
         global_shm->players[i].connected = true;
 
+        #ifdef LOSE_EARLY
+        if (i == 0)
+            global_shm->players[i].total_hits = 12;
+        #endif
+
         // Generate ship placement on battlesfield
         battlefield_place_ships_randomly(&battlefield, i);
 
@@ -182,6 +188,7 @@ server_start:
 
             handle_player(current_player, i, global_shm);
             // pass semaphore details to child process
+            printf("Child ends\n");
             exit(0);
         }
         else {
@@ -206,6 +213,8 @@ server_start:
 
     // pthread_join(log_tid, NULL);
     pthread_join(sched_tid, NULL);
+
+    close(listening_fd);
 
     goto server_start;
 
