@@ -54,22 +54,68 @@ void handle_turn(GameClientData* game_data) {
     char pos_buffer[8];
     vector2d_serialize(&pos, pos_buffer);
     send_message(fd, pos_buffer, 8);
-
-    game_data->attacks_board[coord_to_index(pos, game_data->battlefield_size)] = 'O';
+    client_wait_for_hit_result(game_data);
 }
 
 void handle_game_update(GameClientData* game_data) {
-    int fd = game_data->fd;
-
-    char update_msg[272];
-    size_t update_msg_len;
-    listen_for_message(fd, update_msg);
-    HitResult hr;
-    hitresult_deserialize(&hr, update_msg);
-    printf("Game update!\n");
-    hitresult_print(&hr);
+    client_wait_for_hit_result(game_data);
 }
 
 int coord_to_index(Vector2D vector2d, int width) {
     return vector2d.x + (vector2d.y * width);
+}
+
+void client_wait_for_hit_result(GameClientData* game_data) {
+    char update_msg[272];
+    size_t update_msg_len;
+    listen_for_message(game_data->fd, update_msg);
+    HitResult hr;
+    hitresult_deserialize(&hr, update_msg);
+
+    char new_value;
+    char* attacker_name;
+    char* victim_name;
+
+    if (hr.attacker_index != game_data->our_index)
+        attacker_name = game_data->player_names[hr.attacker_index];
+    else
+        attacker_name = "You";
+
+    if (hr.victim_index != game_data->our_index && hr.type != MISS)
+        victim_name = game_data->player_names[hr.victim_index];
+    else
+        victim_name = "your";
+
+    switch (hr.type) {
+        case MISS:
+        new_value = BF_OTHER_ATTACK;
+        printf("%s missed!\n", attacker_name);
+        break;
+
+        case HIT:
+        if (hr.victim_index == game_data->our_index) {
+            new_value = BF_OUR_SHIP_ATTACKED;
+        }
+        else {
+            new_value = BF_OTHER_ATTACK;
+        }
+        printf("%s hit %s ship!\n", attacker_name, victim_name);
+        break;
+
+        case SINK:
+        if (hr.victim_index == game_data->our_index) {
+            new_value = BF_OUR_SHIP_SUNK;
+        }
+        else {
+            new_value = BF_OTHER_SHIP_SUNK;
+        }
+        printf("%s sunk %s ship!\n", attacker_name, victim_name);
+        break;
+    }
+
+    game_client_data_set_board_char(game_data, hr.position, new_value);
+}
+
+void game_client_data_set_board_char(GameClientData* self, Vector2D pos, char val) {
+    self->game_board[coord_to_index(pos, self->battlefield_size)] = val;
 }

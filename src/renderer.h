@@ -13,6 +13,7 @@
 
 #define ANSI_BG_BLUE "\033[44m"
 #define ANSI_BG_GREY "\033[100m"
+#define ANSI_BG_RED "\033[41m"
 
 #define ANSI_RESET "\033[0m"
 #define ANSI_SLOW_BLINK "\033[5m"
@@ -24,7 +25,8 @@
 
 #define BF_OUR_SHIP 'S'
 #define BF_OUR_SHIP_ATTACKED 'a'
-#define BF_OTHER_SUNK_SHIP 's'
+#define BF_OUR_SHIP_SUNK 'b'
+#define BF_OTHER_SHIP_SUNK 's'
 #define BF_OUR_ATTACK 'X'
 #define BF_OTHER_ATTACK 'x'
 #define BF_EMPTY ' '
