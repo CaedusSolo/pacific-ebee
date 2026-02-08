@@ -156,8 +156,7 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
         sem_wait(&shm->done_ships_array);
     }
 
-    int i = 0;
-    while (i < 3) {
+    while (1) {
         // Wait for turn change to finish
         sem_wait(&shm->change_turn_sem);
 
@@ -193,24 +192,11 @@ void game_loop(SharedMemory *shm, Battlefield* battlefield) {
             shm->players[shm->current_player_index].score += HIT_SCORE;
             shm->hit_result.type = HIT;
             shm->hit_result.victim_index = i;
-
-            // The ship got hit in all places
-            if (*ship_hits == get_ship_size(ship_type)) {
-                shm->players[i].is_sunk[ship_type] = true;
-                shm->players[shm->current_player_index].score += SUNK_SCORE;
-                shm->hit_result.type = SINK;
-            }
-        }
-
-        if (i == 2) {
-            shm->is_game_over = true;
         }
 
         // Notify all child processes
         for (int i = 0; i < shm->player_num; i++) {
             sem_post(&shm->game_update);
         }
-
-        i++;
     }
 }
