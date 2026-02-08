@@ -1,4 +1,5 @@
 #include "shared_memory.h"
+#include "constants.h"
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>

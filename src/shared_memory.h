@@ -1,12 +1,13 @@
 #ifndef SHARED_MEMORY_H
 #define SHARED_MEMORY_H
-#include "battlefield.h"
+
 #define _XOPEN_SOURCE 700
 
-#include <pthread.h>
+#include "messages.h"
 #include "constants.h"
 #include "player.h"
 #include "vector2d.h"
+#include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
 
@@ -22,6 +23,8 @@ typedef struct {
 
     // Messaging between main process and child processes
     Vector2D shoot_position;
+
+    HitResult hit_result;
 
     pthread_mutex_t logger_mutex;
     sem_t log_count_sem;
@@ -46,11 +49,8 @@ typedef struct {
     sem_t turn_sem[PLAYER_NUM];
     sem_t get_ships_array[PLAYER_NUM];
 
-    pid_t player_pids[PLAYER_NUM];
-    PlayerName player_names[PLAYER_NUM];
-    bool player_connected[PLAYER_NUM];
+    Player players[PLAYER_NUM];
 
-    int player_scores[PLAYER_NUM];
     char ships_array[BATTLEFIELD_SIZE * BATTLEFIELD_SIZE];
 } SharedMemory;
 
