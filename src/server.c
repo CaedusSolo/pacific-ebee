@@ -25,6 +25,7 @@
 
 // Global pointer for signal handlers
 SharedMemory* global_shm = NULL;
+FILE* score_file;
 
 void* logger_thread(void* arg) {
     SharedMemory* shm = (SharedMemory*)arg;
@@ -72,6 +73,10 @@ void handle_sigint(int sig) {
     if (global_shm) {
         shared_memory_destroy(global_shm);
     }
+
+    if (score_file)
+        fclose(score_file);
+
     exit(0);
 }
 
@@ -125,7 +130,7 @@ int main(int argc, char *argv[]) {
     global_shm->battlefield_size = battlefield_size;
 
     // Open score file, create if it doesn't exist
-    FILE* score_file = fopen(SCORE_FILENAME, "r+");
+    score_file = fopen(SCORE_FILENAME, "r+");
     if (score_file == NULL) {
         score_file = fopen(SCORE_FILENAME, "w");
         fclose(score_file);
@@ -190,6 +195,7 @@ int main(int argc, char *argv[]) {
 
     // Write back the score file
     write_scores_to_file(score_file, global_shm->score_infos, num_players);
+    fclose(score_file);
     shared_memory_destroy(global_shm);
 
     // pthread_join(log_tid, NULL);
