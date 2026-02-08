@@ -114,6 +114,9 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+        global_shm->players[i].total_hits = 0;
+        global_shm->players[i].score = 0;
+
         // Mark connected in shared memory
         global_shm->players[i].connected = true;
 
