@@ -1,8 +1,10 @@
 #include "battlefield.h"
+#include "constants.h"
 #include "player.h"
 #include "server_connection.h"
 #include "server_game_manager.h"
 #include "shared_memory.h"
+#include "logger.h"
 #include <semaphore.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -39,7 +41,7 @@ void* logger_thread(void* arg) {
 
 void* scheduler_thread(void* arg) {
     SharedMemory* shm = (SharedMemory*)arg;
-    while (!shm->game_running) { sleep(100000); } // Wait for start
+    while (!shm->game_running) { sleep(1); } // Wait for start (Changed to sleep(1) for warning fix)
 
     printf("[Scheduler] Game running. Managing turns...\n");
     while (!shm->is_game_over) {
@@ -117,7 +119,8 @@ int main(int argc, char *argv[]) {
     signal(SIGCHLD, handle_sigchld);
 
     int port = 8999;
-    const int num_players = argv[2] ? strtoumax(argv[2], NULL, 10) : 3;
+    // Dynamic player count handling
+    const int num_players = (argc > 2 && argv[2]) ? strtoumax(argv[2], NULL, 10) : 3;
     const int battlefield_size = 5 + (num_players * 5);
 
     // Initialize Shared Memory
@@ -127,6 +130,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Initialize Logger Indices (HEAD)
+    global_shm->log_head = 0;
+    global_shm->log_tail = 0;
+
+    // Initialize Battlefield Size (Main)
     global_shm->battlefield_size = battlefield_size;
 
     // Open score file, create if it doesn't exist
@@ -141,13 +149,16 @@ int main(int argc, char *argv[]) {
 
     // Start Internal Threads (Parent)
     pthread_t log_tid, sched_tid;
-    // pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
-
+    pthread_create(&log_tid, NULL, logger_thread, (void*)global_shm);
+    pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
+    
     Battlefield battlefield = battlefield_new(battlefield_size, battlefield_size);
 
     // Network Setup
     int listening_fd = server_connection_start(port);
     printf("[Server] Waiting for %d players on port %d...\n", num_players, port);
+
+    log_event(global_shm, "Server listening on port %d", port);
 
     // Accept & Fork Loop
     for (int i = 0; i < num_players; i++) {
@@ -171,9 +182,13 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         else if (pid == 0) {
+            // --- CHILD PROCESS ---
             close(listening_fd);
             Player current_player;
+            memset(&current_player, 0, sizeof(Player));
             current_player.fd = client_fd;
+
+            log_event(global_shm, "Player %d connected!", i);
 
             handle_player(current_player, i, global_shm);
             // pass semaphore details to child process
@@ -181,7 +196,7 @@ int main(int argc, char *argv[]) {
         }
         else {
             // --- PARENT PROCESS ---
-            // close(client_fd);
+            // close(client_fd); // Optional: Close in parent if not needed
 
             global_shm->players[i].pid = pid;
             printf("[Server] Player %d connected (PID: %d)\n", i, pid);
@@ -190,6 +205,7 @@ int main(int argc, char *argv[]) {
 
     global_shm->game_running = true;
     printf("[Server] All players connected. Game Starting.\n");
+
     pthread_create(&sched_tid, NULL, scheduler_thread, (void*)global_shm);
     game_loop(global_shm, &battlefield);
 
@@ -203,5 +219,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-

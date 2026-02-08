@@ -17,6 +17,7 @@
 
 # Log file
 log.txt
+*.log
 
 # score file
 scores.txt

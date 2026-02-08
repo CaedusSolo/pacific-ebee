@@ -37,6 +37,11 @@ typedef struct {
     sem_t log_count_sem;
     pthread_mutex_t game_state_mutex;
 
+
+    LogMessage log_queue[LOG_QUEUE_SIZE];
+    int log_head;
+    int log_tail;
+
     sem_t notify_turn_sem;
     sem_t turn_notified_sem;
 
