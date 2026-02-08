@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Mark connected in shared memory
-        global_shm->player_connected[i] = true;
+        global_shm->players[i].connected = true;
 
         // Generate ship placement on battlesfield
         battlefield_place_ships_randomly(&battlefield, i);
@@ -133,9 +133,9 @@ int main(int argc, char *argv[]) {
         }
         else {
             // --- PARENT PROCESS ---
-            close(client_fd);
+            // close(client_fd);
 
-            global_shm->player_pids[i] = pid;
+            global_shm->players[i].pid = pid;
             printf("[Server] Player %d connected (PID: %d)\n", i, pid);
         }
     }

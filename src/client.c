@@ -1,8 +1,7 @@
-#include "battlefield.h"
 #include "connection.h"
+#include "constants.h"
 #include "game_client_manager.h"
 #include "messages.h"
-#include "vector2d.h"
 #include <stddef.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -34,9 +33,10 @@ int main (int argc, char *argv[]) {
     send_message(fd, argv[1], strlen(argv[1]));
 
     GameClientData game_data = {
-        .battlefield = battlefield_new(10, 10),
-        .fd = fd
+        .fd = fd,
     };
+    memset(game_data.ships_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
+    memset(game_data.attacks_board, ' ', BATTLEFIELD_SIZE * BATTLEFIELD_SIZE);
 
     char buffer[100];
     memset(buffer, 0, 100);
